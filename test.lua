@@ -8,6 +8,13 @@ local e, r, s
 
 local filename = "test.lua"
 
+local function assert_eq(a, b)
+  if a ~= b then
+    print("failed assertion at ", debug.getinfo(2).currentline)
+	print("  ", vim.inspect(a), "!=", vim.inspect(b))
+  end
+end
+
 local function parse (s)
   local t,m = parser.parse(s,filename)
   local r
@@ -36,7 +43,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- testing empty file
@@ -46,7 +53,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- expressions
 
@@ -58,7 +65,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- floating points
 
@@ -128,7 +135,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 h = 0x76c
@@ -139,7 +146,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- long comments
 
@@ -159,7 +166,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- long strings
 
@@ -182,7 +189,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 --[==[
@@ -201,7 +208,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- short strings
 
@@ -218,7 +225,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -233,7 +240,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -251,7 +258,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -267,7 +274,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -281,7 +288,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -301,7 +308,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -318,7 +325,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -334,7 +341,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- syntax error
 
@@ -348,7 +355,7 @@ test.lua:2:1: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 f = 5.e
@@ -358,7 +365,7 @@ test.lua:2:1: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 f = .9e-
@@ -368,7 +375,7 @@ test.lua:2:1: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 f = 5.9e+
@@ -378,7 +385,7 @@ test.lua:2:1: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- integers
 
@@ -392,7 +399,7 @@ test.lua:3:9: syntax error, expected one or more hexadecimal digits after '0x'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- long strings
 
@@ -416,7 +423,7 @@ test.lua:14:1: syntax error, unclosed long string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- short strings
 
@@ -432,7 +439,7 @@ test.lua:4:1: syntax error, unclosed string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 -- short string test begin
@@ -448,7 +455,7 @@ test.lua:4:1: syntax error, unclosed string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- unfinished comments
 
@@ -462,7 +469,7 @@ test.lua:4:1: syntax error, unclosed long string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 print("> testing parser...")
 
@@ -478,7 +485,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local test = function ( a , b , ... ) end
@@ -488,7 +495,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 test = function (...) return ...,0 end
@@ -498,7 +505,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- arithmetic expressions
 
@@ -510,7 +517,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 pow = -3^-2^2
@@ -520,7 +527,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 q, r, f = 3//2, 3%2, 3/2
@@ -530,7 +537,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- assignments
 
@@ -542,7 +549,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 a()[1] = 1;
@@ -552,7 +559,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 i = a.f(1)
@@ -562,7 +569,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 i = a[f(1)]
@@ -572,7 +579,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 a[f()] = sub
@@ -583,7 +590,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 a:b(1)._ = some_value
@@ -593,7 +600,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- bitwise expressions
 
@@ -605,7 +612,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 b = 1 & 0 | 1 >> 1 ~ 1
@@ -615,7 +622,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- break
 
@@ -629,7 +636,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 while 1 do
@@ -644,7 +651,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 repeat
@@ -656,7 +663,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 for i=1,10 do
@@ -672,7 +679,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- block statements
 
@@ -687,7 +694,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- concatenation expressions
 
@@ -699,7 +706,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- empty files
 
@@ -711,7 +718,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- for generic
 
@@ -723,7 +730,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- for numeric
 
@@ -735,7 +742,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 for i=1,10 do end
@@ -745,7 +752,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- global functions
 
@@ -757,7 +764,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function test (...) end
@@ -767,7 +774,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function t.a:b() end
@@ -777,7 +784,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function t.a() end
@@ -787,7 +794,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function testando . funcao . com : espcacos ( e, com , parametros, ... ) end
@@ -797,7 +804,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- goto
 
@@ -810,7 +817,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 ::label::
@@ -821,7 +828,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 goto label
@@ -832,7 +839,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 ::label::
@@ -843,7 +850,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 ::label::
@@ -854,7 +861,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 ::label::
@@ -865,7 +872,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 do goto label end
@@ -876,7 +883,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 do do do do do goto label end end end end end
@@ -887,7 +894,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- if-else
 
@@ -899,7 +906,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then return a else return end
@@ -909,7 +916,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then
@@ -925,7 +932,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then
@@ -941,7 +948,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then return a
@@ -954,7 +961,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then
@@ -967,7 +974,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- labels
 
@@ -981,7 +988,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local x = glob
@@ -993,7 +1000,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- locals
 
@@ -1005,7 +1012,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local a,b,c
@@ -1015,7 +1022,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local a = 1 , 1 + 2, 5.1
@@ -1025,7 +1032,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local a,b,c = 1.9
@@ -1035,7 +1042,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function test() end
@@ -1045,7 +1052,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function test ( a , b , c , ... ) end
@@ -1055,7 +1062,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function test(...) return ... end
@@ -1065,7 +1072,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- relational expressions
 
@@ -1077,7 +1084,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- repeat
 
@@ -1092,7 +1099,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- return
 
@@ -1104,7 +1111,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 return 1
@@ -1114,7 +1121,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 return 1,1-2*3+4,"alo"
@@ -1124,7 +1131,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 return;
@@ -1134,7 +1141,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 return 1;
@@ -1144,7 +1151,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 return 1,1-2*3+4,"alo";
@@ -1154,7 +1161,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- tables
 
@@ -1166,7 +1173,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 t = { 1.5 }
@@ -1176,7 +1183,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 t = {1,2;
@@ -1192,7 +1199,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 t = {[1]=1,[2]=2;
@@ -1208,7 +1215,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local t = {{{}}, {"alo"}}
@@ -1218,7 +1225,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local x = 0
@@ -1229,7 +1236,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local x = 0
@@ -1240,7 +1247,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local x = 0
@@ -1251,7 +1258,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- vararg
 
@@ -1265,7 +1272,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function f ()
@@ -1279,7 +1286,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function f (x, ...)
@@ -1291,7 +1298,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local f = function (x, ...)
@@ -1303,7 +1310,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- while
 
@@ -1319,7 +1326,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- syntax error
 
@@ -1333,7 +1340,7 @@ test.lua:1:19: syntax error, expected a variable name or '...' after ','
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 a = function (...,a) end
@@ -1343,7 +1350,7 @@ test.lua:1:18: syntax error, expected ')' to close the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local a = function (1) end
@@ -1353,7 +1360,7 @@ test.lua:1:21: syntax error, expected ')' to close the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local test = function ( a , b , c , ... )
@@ -1363,7 +1370,7 @@ test.lua:2:1: syntax error, expected 'end' to close the function body
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- arithmetic expressions
 
@@ -1375,7 +1382,7 @@ test.lua:1:9: syntax error, expected an expression after the multiplicative oper
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- bitwise expressions
 
@@ -1387,7 +1394,7 @@ test.lua:1:8: syntax error, expected an expression after '&'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 b = 1 <> 0
@@ -1397,7 +1404,7 @@ test.lua:1:8: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 b = 1 < < 0
@@ -1407,7 +1414,7 @@ test.lua:1:9: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- break
 
@@ -1419,7 +1426,7 @@ test.lua:1:1: syntax error, <break> not inside a loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function f (x)
@@ -1431,7 +1438,7 @@ test.lua:2:13: syntax error, <break> not inside a loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 while 1 do
@@ -1443,7 +1450,7 @@ test.lua:3:1: syntax error, <break> not inside a loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- concatenation expressions
 
@@ -1455,7 +1462,7 @@ test.lua:1:15: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local s = "1 + 1 = "
@@ -1466,7 +1473,7 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- for generic
 
@@ -1478,7 +1485,7 @@ test.lua:1:6: syntax error, expected '=' or 'in' after the variable(s)
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 for k,v in pairs(t:any) do end
@@ -1488,7 +1495,7 @@ test.lua:1:23: syntax error, expected some arguments for the method call (or '()
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- for numeric
 
@@ -1500,7 +1507,7 @@ test.lua:1:13: syntax error, expected a step expression for the numeric range af
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 for i=1,n:number do end
@@ -1510,7 +1517,7 @@ test.lua:1:18: syntax error, expected some arguments for the method call (or '()
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- global functions
 
@@ -1522,7 +1529,7 @@ test.lua:1:21: syntax error, expected a variable name or '...' after ','
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function func(...,a) end
@@ -1532,7 +1539,7 @@ test.lua:1:18: syntax error, expected ')' to close the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function a.b:c:d () end
@@ -1542,7 +1549,7 @@ test.lua:1:15: syntax error, expected '(' for the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- goto
 
@@ -1555,7 +1562,7 @@ test.lua:2:1: syntax error, unexpected character(s), expected EOF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 goto label
@@ -1565,7 +1572,7 @@ test.lua:1:1: syntax error, no visible label 'label' for <goto>
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 goto label
@@ -1576,7 +1583,7 @@ test.lua:1:1: syntax error, no visible label 'label' for <goto>
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 ::other_label::
@@ -1587,7 +1594,7 @@ test.lua:2:10: syntax error, no visible label 'label' for <goto>
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- if-else
 
@@ -1599,7 +1606,7 @@ test.lua:2:1: syntax error, expected 'end' to close the if statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then else
@@ -1609,7 +1616,7 @@ test.lua:2:1: syntax error, expected 'end' to close the if statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then
@@ -1625,7 +1632,7 @@ test.lua:7:1: syntax error, expected a condition after 'elseif'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a:any then else end
@@ -1635,7 +1642,7 @@ test.lua:1:10: syntax error, expected some arguments for the method call (or '()
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- labels
 
@@ -1648,7 +1655,7 @@ test.lua:2:4: syntax error, expected a label name after '::'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 ::label::
@@ -1660,7 +1667,7 @@ test.lua:3:1: syntax error, label 'label' already defined at line 1
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- locals
 
@@ -1672,7 +1679,7 @@ test.lua:2:1: syntax error, expected one or more expressions after '='
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function t.a() end
@@ -1682,7 +1689,7 @@ test.lua:1:17: syntax error, expected '(' for the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function test (a,) end
@@ -1692,7 +1699,7 @@ test.lua:1:24: syntax error, expected a variable name or '...' after ','
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function test(...,a) end
@@ -1702,7 +1709,7 @@ test.lua:1:24: syntax error, expected ')' to close the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function (a, b, c, ...) end
@@ -1712,7 +1719,7 @@ test.lua:1:16: syntax error, expected a function name after 'function'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- repeat
 
@@ -1726,7 +1733,7 @@ test.lua:4:1: syntax error, expected 'until' at the end of the repeat loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- return
 
@@ -1743,7 +1750,7 @@ test.lua:2:1: syntax error, unexpected character(s), expected EOF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- tables
 
@@ -1755,7 +1762,7 @@ test.lua:1:7: syntax error, expected '}' to close the table constructor
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- vararg
 
@@ -1769,7 +1776,7 @@ test.lua:2:10: syntax error, cannot use '...' outside a vararg function
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function f ()
@@ -1783,7 +1790,7 @@ test.lua:3:12: syntax error, cannot use '...' outside a vararg function
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function f (x)
@@ -1795,7 +1802,7 @@ test.lua:2:10: syntax error, cannot use '...' outside a vararg function
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local f = function (x)
@@ -1807,7 +1814,7 @@ test.lua:2:10: syntax error, cannot use '...' outside a vararg function
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- while
 
@@ -1822,7 +1829,7 @@ test.lua:3:3: syntax error, expected 'do' after the condition
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 print("> testing more syntax errors...")
 
@@ -1835,7 +1842,7 @@ test.lua:1:9: syntax error, unexpected character(s), expected EOF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 while foo do if bar then baz() end end end
@@ -1845,7 +1852,7 @@ test.lua:1:40: syntax error, unexpected character(s), expected EOF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local func f()
@@ -1857,7 +1864,7 @@ test.lua:3:1: syntax error, unexpected character(s), expected EOF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function qux()
@@ -1875,7 +1882,7 @@ test.lua:8:1: syntax error, unexpected character(s), expected EOF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrInvalidStat
 s = [=[
@@ -1886,7 +1893,7 @@ test.lua:1:17: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local i : int = 0
@@ -1896,7 +1903,7 @@ test.lua:1:9: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local a = 1, b = 2
@@ -1914,7 +1921,7 @@ test.lua:2:3: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 obj::hello()
@@ -1924,7 +1931,7 @@ test.lua:1:1: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 while foo() do
@@ -1937,7 +1944,7 @@ test.lua:2:3: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 repeat:
@@ -1950,7 +1957,7 @@ test.lua:1:7: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function f(x)
@@ -1964,7 +1971,7 @@ test.lua:3:3: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x;
@@ -1974,7 +1981,7 @@ test.lua:1:1: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 a, b, c
@@ -1984,7 +1991,7 @@ test.lua:1:1: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local x = 42 // the meaning of life
@@ -1994,7 +2001,7 @@ test.lua:1:21: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 let x = 2
@@ -2004,7 +2011,7 @@ test.lua:1:1: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if p then
@@ -2018,7 +2025,7 @@ test.lua:3:1: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function foo()
@@ -2030,7 +2037,7 @@ test.lua:3:1: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEndIf
 s = [=[
@@ -2041,7 +2048,7 @@ test.lua:2:1: syntax error, expected 'end' to close the if statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if 1 > 2 then return; print("impossible") end
@@ -2051,7 +2058,7 @@ test.lua:1:23: syntax error, expected 'end' to close the if statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if condA then doThis()
@@ -2062,7 +2069,7 @@ test.lua:3:1: syntax error, expected 'end' to close the if statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if a then
@@ -2078,7 +2085,7 @@ test.lua:5:1: syntax error, expected 'end' to close the if statement
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprIf
 s = [=[
@@ -2089,7 +2096,7 @@ test.lua:1:4: syntax error, expected a condition after 'if'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 if !ok then error("fail") end
@@ -2099,7 +2106,7 @@ test.lua:1:4: syntax error, expected a condition after 'if'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrThenIf
 s = [=[
@@ -2112,7 +2119,7 @@ test.lua:2:3: syntax error, expected 'then' after the condition
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprEIf
 s = [=[
@@ -2124,7 +2131,7 @@ test.lua:2:8: syntax error, expected a condition after 'elseif'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrThenEIf
 s = [=[
@@ -2138,7 +2145,7 @@ test.lua:2:18: syntax error, expected 'then' after the condition
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEndDo
 s = [=[
@@ -2149,7 +2156,7 @@ test.lua:2:1: syntax error, expected 'end' to close the do block
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 do
@@ -2162,7 +2169,7 @@ test.lua:3:3: syntax error, expected 'end' to close the do block
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprWhile
 s = [=[
@@ -2173,7 +2180,7 @@ test.lua:1:7: syntax error, expected a condition after 'while'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 while do print("hello again!") end
@@ -2183,7 +2190,7 @@ test.lua:1:7: syntax error, expected a condition after 'while'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrDoWhile
 s = [=[
@@ -2194,7 +2201,7 @@ test.lua:1:16: syntax error, expected 'do' after the condition
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 while not done
@@ -2206,7 +2213,7 @@ test.lua:2:3: syntax error, expected 'do' after the condition
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEndWhile
 s = [=[
@@ -2217,7 +2224,7 @@ test.lua:2:1: syntax error, expected 'end' to close the while loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 while i < #arr do
@@ -2230,7 +2237,7 @@ test.lua:5:1: syntax error, expected 'end' to close the while loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrUntilRep
 s = [=[
@@ -2241,7 +2248,7 @@ test.lua:2:1: syntax error, expected 'until' at the end of the repeat loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprRep
 s = [=[
@@ -2252,7 +2259,7 @@ test.lua:1:21: syntax error, expected a conditions after 'until'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrForRange
 s = [=[
@@ -2265,7 +2272,7 @@ test.lua:1:5: syntax error, expected a numeric or generic range after 'for'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEndFor
 s = [=[
@@ -2276,7 +2283,7 @@ test.lua:2:1: syntax error, expected 'end' to close the for loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprFor1
 s = [=[
@@ -2287,7 +2294,7 @@ test.lua:1:9: syntax error, expected a starting expression for the numeric range
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCommaFor
 s = [=[
@@ -2298,7 +2305,7 @@ test.lua:1:11: syntax error, expected ',' to split the start and end of the rang
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprFor2
 s = [=[
@@ -2309,7 +2316,7 @@ test.lua:1:12: syntax error, expected an ending expression for the numeric range
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprFor3
 s = [=[
@@ -2320,7 +2327,7 @@ test.lua:1:15: syntax error, expected a step expression for the numeric range af
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrInFor
 s = [=[
@@ -2331,7 +2338,7 @@ test.lua:1:9: syntax error, expected '=' or 'in' after the variable(s)
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 for nums := 1,10 do print(i) end
@@ -2341,7 +2348,7 @@ test.lua:1:10: syntax error, expected '=' or 'in' after the variable(s)
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEListFor
 s = [=[
@@ -2352,7 +2359,7 @@ test.lua:1:10: syntax error, expected one or more expressions after 'in'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrDoFor
 s = [=[
@@ -2363,7 +2370,7 @@ test.lua:1:14: syntax error, expected 'do' after the range of the for loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 for _, elem in ipairs(list)
@@ -2375,7 +2382,7 @@ test.lua:2:3: syntax error, expected 'do' after the range of the for loop
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrDefLocal
 s = [=[
@@ -2386,7 +2393,7 @@ test.lua:2:1: syntax error, expected a function definition or assignment after l
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local; x = 2
@@ -2396,7 +2403,7 @@ test.lua:1:6: syntax error, expected a function definition or assignment after l
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local *p = nil
@@ -2406,7 +2413,7 @@ test.lua:1:7: syntax error, expected a function definition or assignment after l
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrNameLFunc
 s = [=[
@@ -2417,7 +2424,7 @@ test.lua:1:15: syntax error, expected a function name after 'function'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function 3dprint(x, y, z) end
@@ -2427,7 +2434,7 @@ test.lua:1:16: syntax error, expected a function name after 'function'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local function repeat(f, ntimes) for i = 1,ntimes do f() end end
@@ -2437,7 +2444,7 @@ test.lua:1:16: syntax error, expected a function name after 'function'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEListLAssign
 s = [=[
@@ -2448,7 +2455,7 @@ test.lua:1:11: syntax error, expected one or more expressions after '='
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEListAssign
 s = [=[
@@ -2459,7 +2466,7 @@ test.lua:1:5: syntax error, expected one or more expressions after '='
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrFuncName
 s = [=[
@@ -2470,7 +2477,7 @@ test.lua:1:9: syntax error, expected a function name after 'function'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function 3dprint(x, y, z) end
@@ -2480,7 +2487,7 @@ test.lua:1:10: syntax error, expected a function name after 'function'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function repeat(f, ntimes) for i = 1,ntimes do f() end end
@@ -2490,7 +2497,7 @@ test.lua:1:10: syntax error, expected a function name after 'function'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrNameFunc1
 s = [=[
@@ -2501,7 +2508,7 @@ test.lua:1:14: syntax error, expected a function name after '.'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function foo.1() end
@@ -2511,7 +2518,7 @@ test.lua:1:14: syntax error, expected a function name after '.'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrNameFunc2
 s = [=[
@@ -2522,7 +2529,7 @@ test.lua:1:14: syntax error, expected a method name after ':'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function foo:1() end
@@ -2532,7 +2539,7 @@ test.lua:1:14: syntax error, expected a method name after ':'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrOParenPList
 s = [=[
@@ -2545,7 +2552,7 @@ test.lua:2:3: syntax error, expected '(' for the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function foo?(bar)
@@ -2557,7 +2564,7 @@ test.lua:1:13: syntax error, expected '(' for the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCParenPList
 s = [=[
@@ -2570,7 +2577,7 @@ test.lua:2:3: syntax error, expected ')' to close the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function foo(bar; baz)
@@ -2582,7 +2589,7 @@ test.lua:1:17: syntax error, expected ')' to close the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function foo(a, b, ...rest) end
@@ -2592,7 +2599,7 @@ test.lua:1:23: syntax error, expected ')' to close the parameter list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEndFunc
 s = [=[
@@ -2604,7 +2611,7 @@ test.lua:3:1: syntax error, expected 'end' to close the function body
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 function foo() do
@@ -2616,7 +2623,7 @@ test.lua:4:1: syntax error, expected 'end' to close the function body
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrParList
 s = [=[
@@ -2629,7 +2636,7 @@ test.lua:1:23: syntax error, expected a variable name or '...' after ','
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrLabel
 s = [=[
@@ -2640,7 +2647,7 @@ test.lua:1:3: syntax error, expected a label name after '::'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCloseLabel
 s = [=[
@@ -2651,7 +2658,7 @@ test.lua:2:1: syntax error, expected '::' after the label
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrGoto
 s = [=[
@@ -2662,7 +2669,7 @@ test.lua:1:5: syntax error, expected a label after 'goto'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 goto 1
@@ -2672,7 +2679,7 @@ test.lua:1:6: syntax error, expected a label after 'goto'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrRetList
 s = [=[
@@ -2683,7 +2690,7 @@ test.lua:2:1: syntax error, expected an expression after ',' in the return state
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrVarList
 s = [=[
@@ -2694,7 +2701,7 @@ test.lua:1:7: syntax error, expected a variable name after ','
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprList
 s = [=[
@@ -2705,7 +2712,7 @@ test.lua:2:1: syntax error, expected an expression after ','
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrOrExpr
 s = [=[
@@ -2716,7 +2723,7 @@ test.lua:1:9: syntax error, expected an expression after 'or'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a or $b
@@ -2726,7 +2733,7 @@ test.lua:1:10: syntax error, expected an expression after 'or'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrAndExpr
 s = [=[
@@ -2737,7 +2744,7 @@ test.lua:1:10: syntax error, expected an expression after 'and'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a and $b
@@ -2747,7 +2754,7 @@ test.lua:1:11: syntax error, expected an expression after 'and'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrRelExpr
 s = [=[
@@ -2758,7 +2765,7 @@ test.lua:1:8: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a < $b
@@ -2768,7 +2775,7 @@ test.lua:1:9: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a <=)
@@ -2778,7 +2785,7 @@ test.lua:1:9: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a <= $b
@@ -2788,7 +2795,7 @@ test.lua:1:10: syntax error, expected an expression after the relational operato
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a >)
@@ -2798,7 +2805,7 @@ test.lua:1:8: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a > $b
@@ -2808,7 +2815,7 @@ test.lua:1:9: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a >=)
@@ -2818,7 +2825,7 @@ test.lua:1:9: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a >= $b
@@ -2828,7 +2835,7 @@ test.lua:1:10: syntax error, expected an expression after the relational operato
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a ==)
@@ -2838,7 +2845,7 @@ test.lua:1:9: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a == $b
@@ -2848,7 +2855,7 @@ test.lua:1:10: syntax error, expected an expression after the relational operato
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a ~=)
@@ -2858,7 +2865,7 @@ test.lua:1:9: syntax error, expected an expression after the relational operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a ~= $b
@@ -2868,7 +2875,7 @@ test.lua:1:10: syntax error, expected an expression after the relational operato
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrBOrExpr
 s = [=[
@@ -2879,7 +2886,7 @@ test.lua:1:8: syntax error, expected an expression after '|'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a | $b
@@ -2889,7 +2896,7 @@ test.lua:1:9: syntax error, expected an expression after '|'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrBXorExpr
 s = [=[
@@ -2900,7 +2907,7 @@ test.lua:1:8: syntax error, expected an expression after '~'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a ~ $b
@@ -2910,7 +2917,7 @@ test.lua:1:9: syntax error, expected an expression after '~'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrBAndExpr
 s = [=[
@@ -2921,7 +2928,7 @@ test.lua:1:8: syntax error, expected an expression after '&'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a & $b
@@ -2931,7 +2938,7 @@ test.lua:1:9: syntax error, expected an expression after '&'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrShiftExpr
 s = [=[
@@ -2942,7 +2949,7 @@ test.lua:1:9: syntax error, expected an expression after the bit shift
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a >> $b
@@ -2952,7 +2959,7 @@ test.lua:1:10: syntax error, expected an expression after the bit shift
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a <<)
@@ -2962,7 +2969,7 @@ test.lua:1:9: syntax error, expected an expression after the bit shift
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a >> $b
@@ -2972,7 +2979,7 @@ test.lua:1:10: syntax error, expected an expression after the bit shift
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a >>> b
@@ -2982,7 +2989,7 @@ test.lua:1:9: syntax error, expected an expression after the bit shift
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrConcatExpr
 s = [=[
@@ -2993,7 +3000,7 @@ test.lua:1:9: syntax error, expected an expression after '..'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a .. $b
@@ -3003,7 +3010,7 @@ test.lua:1:10: syntax error, expected an expression after '..'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrAddExpr
 s = [=[
@@ -3014,7 +3021,7 @@ test.lua:1:8: syntax error, expected an expression after the additive operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a + $b
@@ -3024,7 +3031,7 @@ test.lua:1:9: syntax error, expected an expression after the additive operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a -, b)
@@ -3034,7 +3041,7 @@ test.lua:1:8: syntax error, expected an expression after the additive operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a - $b
@@ -3044,7 +3051,7 @@ test.lua:1:9: syntax error, expected an expression after the additive operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 arr[i++]
@@ -3054,7 +3061,7 @@ test.lua:1:7: syntax error, expected an expression after the additive operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrMulExpr
 s = [=[
@@ -3065,7 +3072,7 @@ test.lua:1:11: syntax error, expected an expression after the multiplicative ope
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a * $b
@@ -3075,7 +3082,7 @@ test.lua:1:9: syntax error, expected an expression after the multiplicative oper
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(b, a /)
@@ -3085,7 +3092,7 @@ test.lua:1:11: syntax error, expected an expression after the multiplicative ope
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a / $b
@@ -3095,7 +3102,7 @@ test.lua:1:9: syntax error, expected an expression after the multiplicative oper
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(b, a //)
@@ -3105,7 +3112,7 @@ test.lua:1:12: syntax error, expected an expression after the multiplicative ope
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a // $b
@@ -3115,7 +3122,7 @@ test.lua:1:10: syntax error, expected an expression after the multiplicative ope
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(b, a %)
@@ -3125,7 +3132,7 @@ test.lua:1:11: syntax error, expected an expression after the multiplicative ope
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a % $b
@@ -3135,7 +3142,7 @@ test.lua:1:9: syntax error, expected an expression after the multiplicative oper
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrUnaryExpr
 s = [=[
@@ -3146,7 +3153,7 @@ test.lua:1:15: syntax error, expected an expression after the unary operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x, y = a + -, b
@@ -3156,7 +3163,7 @@ test.lua:1:13: syntax error, expected an expression after the unary operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x, y = a + #, b
@@ -3166,7 +3173,7 @@ test.lua:1:13: syntax error, expected an expression after the unary operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x, y = a + ~, b
@@ -3176,7 +3183,7 @@ test.lua:1:13: syntax error, expected an expression after the unary operator
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrPowExpr
 s = [=[
@@ -3187,7 +3194,7 @@ test.lua:1:8: syntax error, expected an expression after '^'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x = a ^ $b
@@ -3208,7 +3215,7 @@ test.lua:1:6: syntax error, expected an expression after '('
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 y = (???)
@@ -3218,7 +3225,7 @@ test.lua:1:6: syntax error, expected an expression after '('
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCParenExpr
 s = [=[
@@ -3229,7 +3236,7 @@ test.lua:2:1: syntax error, expected ')' to close the expression
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 w = (0xBV)
@@ -3239,7 +3246,7 @@ test.lua:1:9: syntax error, expected ')' to close the expression
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 ans = 2^(m*(n-1)
@@ -3249,7 +3256,7 @@ test.lua:2:1: syntax error, expected ')' to close the expression
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrNameIndex
 s = [=[
@@ -3260,7 +3267,7 @@ test.lua:2:1: syntax error, expected a field name after '.'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 f = t.['f']
@@ -3270,7 +3277,7 @@ test.lua:1:7: syntax error, expected a field name after '.'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x.
@@ -3280,7 +3287,7 @@ test.lua:2:1: syntax error, expected a field name after '.'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprIndex
 s = [=[
@@ -3291,7 +3298,7 @@ test.lua:1:7: syntax error, expected an expression after '['
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 f = t[?]
@@ -3301,7 +3308,7 @@ test.lua:1:7: syntax error, expected an expression after '['
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCBracketIndex
 s = [=[
@@ -3312,7 +3319,7 @@ test.lua:2:1: syntax error, expected ']' to close the indexing expression
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 f = t[x,y]
@@ -3322,7 +3329,7 @@ test.lua:1:8: syntax error, expected ']' to close the indexing expression
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 arr[i--]
@@ -3332,7 +3339,7 @@ test.lua:2:1: syntax error, expected ']' to close the indexing expression
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrNameMeth
 s = [=[
@@ -3343,7 +3350,7 @@ test.lua:2:1: syntax error, expected a method name after ':'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 x := 0
@@ -3353,7 +3360,7 @@ test.lua:1:4: syntax error, expected a method name after ':'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrMethArgs
 s = [=[
@@ -3364,7 +3371,7 @@ test.lua:2:1: syntax error, expected some arguments for the method call (or '()'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 dog:bark msg
@@ -3374,7 +3381,7 @@ test.lua:1:10: syntax error, expected some arguments for the method call (or '()
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 duck:quack[4]
@@ -3384,7 +3391,7 @@ test.lua:1:11: syntax error, expected some arguments for the method call (or '()
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local t = {
@@ -3397,7 +3404,7 @@ test.lua:3:5: syntax error, expected some arguments for the method call (or '()'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrArgList
 s = [=[
@@ -3408,7 +3415,7 @@ test.lua:1:11: syntax error, expected an expression after ',' in the argument li
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(a, b, ..)
@@ -3418,7 +3425,7 @@ test.lua:1:11: syntax error, expected an expression after ',' in the argument li
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCParenArgs
 s = [=[
@@ -3429,7 +3436,7 @@ test.lua:2:1: syntax error, expected ')' to close the argument list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 foo(arg1 arg2)
@@ -3439,7 +3446,7 @@ test.lua:1:10: syntax error, expected ')' to close the argument list
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCBraceTable
 s = [=[
@@ -3450,7 +3457,7 @@ test.lua:1:16: syntax error, expected '}' to close the table constructor
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 nums = {
@@ -3465,7 +3472,7 @@ test.lua:4:3: syntax error, expected '}' to close the table constructor
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEqField
 s = [=[
@@ -3476,7 +3483,7 @@ test.lua:1:24: syntax error, expected '=' after the table key
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprField
 s = [=[
@@ -3487,7 +3494,7 @@ test.lua:1:25: syntax error, expected an expression after '='
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprFKey
 s = [=[
@@ -3498,7 +3505,7 @@ test.lua:1:12: syntax error, expected an expression after '[' for the table key
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCBracketFKey
 s = [=[
@@ -3509,7 +3516,7 @@ test.lua:1:16: syntax error, expected ']' to close the table key
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 
 -- ErrDigitHex
@@ -3521,7 +3528,7 @@ test.lua:1:9: syntax error, expected one or more hexadecimal digits after '0x'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 print(0xGG)
@@ -3531,7 +3538,7 @@ test.lua:1:9: syntax error, expected one or more hexadecimal digits after '0x'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrDigitDeci
 s = [=[
@@ -3542,7 +3549,7 @@ test.lua:1:12: syntax error, expected one or more digits after the decimal point
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 print(.)
@@ -3552,7 +3559,7 @@ test.lua:1:8: syntax error, expected one or more digits after the decimal point
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrDigitExpo
 s = [=[
@@ -3563,7 +3570,7 @@ test.lua:1:11: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 print(3E)
@@ -3573,7 +3580,7 @@ test.lua:1:9: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrQuote
 s = [=[
@@ -3584,7 +3591,7 @@ test.lua:2:1: syntax error, unclosed string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local message = "*******
@@ -3596,7 +3603,7 @@ test.lua:2:1: syntax error, unclosed string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local message = 'Hello
@@ -3606,7 +3613,7 @@ test.lua:2:1: syntax error, unclosed string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 local message = '*******
@@ -3618,7 +3625,7 @@ test.lua:2:1: syntax error, unclosed string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrHexEsc
 s = [=[
@@ -3629,7 +3636,7 @@ test.lua:1:10: syntax error, expected exactly two hexadecimal digits after '\x'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 print("\xF")
@@ -3639,7 +3646,7 @@ test.lua:1:10: syntax error, expected exactly two hexadecimal digits after '\x'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 print("\xG")
@@ -3649,7 +3656,7 @@ test.lua:1:10: syntax error, expected exactly two hexadecimal digits after '\x'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrOBraceUEsc
 s = [=[
@@ -3660,7 +3667,7 @@ test.lua:1:10: syntax error, expected '{' after '\u'
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrDigitUEsc
 s = [=[
@@ -3671,7 +3678,7 @@ test.lua:1:11: syntax error, expected one or more hexadecimal digits for the UTF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 print("\u{XD}")
@@ -3681,7 +3688,7 @@ test.lua:1:11: syntax error, expected one or more hexadecimal digits for the UTF
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCBraceUEsc
 s = [=[
@@ -3692,7 +3699,7 @@ test.lua:1:12: syntax error, expected '}' after the code point
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 s = [=[
 print("\u{FFFF Hi")
@@ -3702,7 +3709,7 @@ test.lua:1:15: syntax error, expected '}' after the code point
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrEscSeq
 s = [=[
@@ -3713,7 +3720,7 @@ test.lua:1:9: syntax error, invalid escape sequence
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 -- ErrCloseLStr
 s = [===[
@@ -3728,7 +3735,7 @@ test.lua:6:1: syntax error, unclosed long string
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 print("> testing issues...")
 
@@ -3753,6 +3760,6 @@ e = [=[
 ]=]
 
 r = parse(s)
-assert(r == e)
+assert_eq(r, e)
 
 print("OK")

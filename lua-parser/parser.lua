@@ -161,7 +161,9 @@ local function throw(label)
   label = "Err" .. label
   for i, labelinfo in ipairs(labels) do
     if labelinfo[1] == label then
-      return T(i)
+      return Cmt(P(1), function(subject, pos)
+        error('at: ' .. pos .. ': ' .. labelinfo[2])
+      end)
     end
   end
 
@@ -371,7 +373,7 @@ local G = {
   -- lexer
   Skip         = (V "Space" + V "Comment") ^ 0,
   Space        = space ^ 1,
-  Comment      = P "--" * V "LongStr" / function() return end
+  Comment      = P "--" * V "LongStr" / function() end
       + P "--" * (P(1) - P "\n") ^ 0,
 
   Name         = token(-V "Reserved" * C(V "Ident")),
@@ -468,25 +470,30 @@ local validator = require("lua-parser.validator")
 local validate = validator.validate
 local syntaxerror = validator.syntaxerror
 
+---@param subject any
+---@param filename string
+---@return any ast
+---@return any error
 function parser.parse(subject, filename)
   local errorinfo = { subject = subject, filename = filename }
   lpeg.setmaxstack(1000)
-  local ast, label, errorpos = lpeg.match(G, subject, nil, errorinfo)
-  if not ast then
-    if parser.detailed_errors then
-      local re = require "relabel"
-      local line, col = re.calcline(subject, errorpos)
-      return ast, {
-        line = line,
-        column = col,
-        id = labels[label][1],
-        message = labels[label][2],
-        position = errorpos,
-      }
-    else
-      local errmsg = labels[label][2]
-      return ast, syntaxerror(errorinfo, errorpos, errmsg)
-    end
+  local ok, ast = pcall(lpeg.match, G, subject, nil, errorinfo)
+  if not ok then
+    return nil, ast
+    -- if parser.detailed_errors then
+    --   local re = require "relabel"
+    --   local line, col = re.calcline(subject, errorpos)
+    --   return ast, {
+    --     line = line,
+    --     column = col,
+    --     id = labels[label][1],
+    --     message = labels[label][2],
+    --     position = errorpos,
+    --   }
+    -- else
+    --   local errmsg = labels[label][2]
+    --   return ast, syntaxerror(errorinfo, errorpos, errmsg)
+    -- end
   end
   return validate(ast, errorinfo)
 end

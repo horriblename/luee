@@ -169,7 +169,7 @@ local function throw(label)
 end
 
 local function expect(patt, label)
-  return patt -- + throw(label)
+  return patt + throw(label)
 end
 
 
@@ -417,9 +417,9 @@ local G = {
 
         + digit * digit ^ -2 / tonumber / string.char
         + P "x" * expect(C(xdigit * xdigit), "HexEsc") * Cc(16) / tonumber / string.char
-        + P "u" * expect("{", "OBraceUEsc")
+        + P "u" * expect(P("{"), "OBraceUEsc")
         * expect(C(xdigit ^ 1), "DigitUEsc") * Cc(16)
-        * expect("}", "CBraceUEsc")
+        * expect(P("}"), "CBraceUEsc")
         / tonumber
         / (utf8 and utf8.char or string.char) -- true max is \u{10FFFF}
         -- utf8.char needs Lua 5.3

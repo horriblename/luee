@@ -162,7 +162,7 @@ local function throw(label)
   for i, labelinfo in ipairs(labels) do
     if labelinfo[1] == label then
       return Cmt(P(1), function(subject, pos)
-        error('at: ' .. pos .. ': ' .. labelinfo[2])
+        error({ offset = pos, errmsg = labelinfo[2] })
       end)
     end
   end
@@ -469,6 +469,7 @@ local parser = { detailed_errors = false }
 local validator = require("lua-parser.validator")
 local validate = validator.validate
 local syntaxerror = validator.syntaxerror
+local offset_to_pos = validator.offset_to_pos
 
 ---@param subject any
 ---@param filename string
@@ -479,7 +480,14 @@ function parser.parse(subject, filename)
   lpeg.setmaxstack(1000)
   local ok, ast = pcall(lpeg.match, G, subject, nil, errorinfo)
   if not ok then
-    return nil, ast
+    local err = ast
+    if type(err) ~= "table" or err.offset == nil or err.errmsg == nil then
+      error(err)
+    end
+    local pos = offset_to_pos(errorinfo.subject, err.offset)
+    local msg = string.format('%s:%d:%d: syntax error, %s', filename, pos.line, pos.col, err.errmsg)
+
+    return nil, msg
     -- if parser.detailed_errors then
     --   local re = require "relabel"
     --   local line, col = re.calcline(subject, errorpos)

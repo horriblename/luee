@@ -182,6 +182,56 @@ function fieldlist2str(fieldlist)
   end
 end
 
+local function pipe2str(exp)
+  local lhs = exp[2]
+  local rhs = exp[3]
+  if rhs.tag == "Call" then
+    local call = {
+      tag = "Call",
+      pos = exp.pos,
+      end_pos = exp.end_pos,
+      [1] = rhs[1],
+      [2] = lhs,
+    }
+
+    for i = 2, #exp[3] do
+      call[i + 1] = exp[3][i]
+    end
+
+    return exp2str(call)
+  elseif rhs.tag == "Invoke" then
+    local call = {
+      tag = "Invoke",
+      pos = exp.pos,
+      end_pos = exp.end_pos,
+      [1] = rhs[1],
+      [2] = rhs[2],
+      [3] = lhs,
+    }
+
+    for i = 3, #exp[3] do
+      call[i + 1] = exp[3][i]
+    end
+
+    return exp2str(call)
+  end
+
+  local call = {
+    tag = "Call",
+    pos = exp.pos,
+    end_pos = exp.end_pos,
+    [1] = {
+      tag = "Paren",
+      pos = exp[3].pos,
+      end_pos = exp[3].end_pos,
+      [1] = exp[3],
+    },
+    [2] = exp[2],
+  }
+  local ret = exp2str(call)
+  return ret
+end
+
 function exp2str(exp)
   local tag = exp.tag
   local str
@@ -211,33 +261,7 @@ function exp2str(exp)
     str = fieldlist2str(exp)
   elseif tag == "Op" then    -- `Op{ opid expr expr? }
     if exp[1] == "pipe" then
-      if exp[3].tag == "Call" then
-        local call = {
-          tag = "Call",
-          pos = exp.pos,
-          end_pos = exp.end_pos,
-          [2] = exp[2],
-        }
-        for i = 2, #exp[3] do
-          call[i + 1] = exp[3][i]
-        end
-        return exp2str(call)
-      end
-
-      local call = {
-        tag = "Call",
-        pos = exp.pos,
-        end_pos = exp.end_pos,
-        [1] = {
-          tag = "Paren",
-          pos = exp[3].pos,
-          end_pos = exp[3].end_pos,
-          [1] = exp[3],
-        },
-        [2] = exp[2],
-      }
-      local ret = exp2str(call)
-      return ret
+      return pipe2str(exp)
     end
     str = exp2str(exp[2])
     str = str .. op2str(exp[1])

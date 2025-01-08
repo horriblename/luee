@@ -86,6 +86,18 @@ local function traverse_function(env, exp)
   return true
 end
 
+local function traverse_fn(env, exp)
+  new_function(env)
+  new_scope(env)
+  local status, msg = traverse_parlist(env, exp[1])
+  if not status then return status, msg end
+  status, msg = traverse_exp(env, exp[2])
+  if not status then return status, msg end
+  end_scope(env)
+  end_function(env)
+  return true
+end
+
 local function traverse_op(env, exp)
   local status, msg = traverse_exp(env, exp[2])
   if not status then return status, msg end
@@ -315,6 +327,8 @@ function traverse_exp(env, exp)
   elseif tag == "Id" or         -- `Id{ <string> }
       tag == "Index" then       -- `Index{ expr expr }
     return traverse_var(env, exp)
+  elseif tag == "Fn" then
+    return traverse_fn(env, exp)
   else
     error("expecting an expression, but got a " .. tag)
   end

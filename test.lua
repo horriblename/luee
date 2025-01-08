@@ -11,12 +11,12 @@ local filename = "test.lua"
 local function assert_eq(a, b)
   if a ~= b then
     print("failed assertion at ", debug.getinfo(2).currentline)
-	print("  ", vim.inspect(a), "!=", vim.inspect(b))
+    print("  ", vim.inspect(a), "!=", vim.inspect(b))
   end
 end
 
-local function parse (s)
-  local t,m = parser.parse(s,filename)
+local function parse(s)
+  local t, m = parser.parse(s, filename)
   local r
   if not t then
     r = m
@@ -26,8 +26,8 @@ local function parse (s)
   return r .. "\n"
 end
 
-local function fixint (s)
-  return _VERSION < "Lua 5.3" and s:gsub("%.0","") or s
+local function fixint(s)
+  return _VERSION < "Lua 5.3" and s:gsub("%.0", "") or s
 end
 
 print("> testing lexer...")
@@ -62,6 +62,33 @@ _nil,_false,_true,_dots = nil,false,true,...
 ]=]
 e = [=[
 { `Set{ { `Id "_nil", `Id "_false", `Id "_true", `Id "_dots" }, { `Nil, `Boolean "false", `Boolean "true", `Dots } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- pipes
+
+s = [[
+x = 0 |> f()
+
+y = f() |> g() |> h
+]]
+e = [=[
+{ `Set{ { `Id "x" }, { `Op{ "pipe", `Number "0", `Call{ `Id "f" } } } }, `Set{ { `Id "y" }, { `Op{ "pipe", `Op{ "pipe", `Call{ `Id "f" }, `Call{ `Id "g" } }, `Id "h" } } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+--- fn
+
+s = [[
+x = fn(x) x+1
+y = 12 |> fn(y) y*3 |> g
+]]
+e = [=[
+{ `Set{ { `Id "x" }, { Fn{ { `Id "x" }, `Op{ "add", `Id "x", `Number "1" } } } }, `Set{ { `Id "y" }, { `Op{ "pipe", `Op{ "pipe", `Number "12", Fn{ { `Id "y" }, `Op{ "mul", `Id "y", `Number "3" } } }, `Id "g" } } } }
 ]=]
 
 r = parse(s)
@@ -2683,7 +2710,7 @@ assert_eq(r, e)
 
 -- ErrRetList
 s = [=[
-return a, b, 
+return a, b,
 ]=]
 e = [=[
 test.lua:2:1: syntax error, expected an expression after ',' in the return statement

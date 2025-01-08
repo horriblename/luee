@@ -114,6 +114,9 @@ local labels = {
   { "ErrVarList",       "expected a variable name after ','" },
   { "ErrExprList",      "expected an expression after ','" },
 
+  { "ErrFnBody",        "expected an expression after fn(...)" },
+
+  { "ErrPipeExpr",      "expected an expression after '|>'" },
   { "ErrOrExpr",        "expected an expression after 'or'" },
   { "ErrAndExpr",       "expected an expression after 'and'" },
   { "ErrRelExpr",       "expected an expression after the relational operator" },
@@ -174,6 +177,12 @@ local function expect(patt, label)
   return patt + throw(label)
 end
 
+local function dbg(patt, msg)
+  return patt / function(...)
+    print("[dbg] on ", msg)
+    return ...
+  end
+end
 
 -- regular combinators and auxiliary functions
 
@@ -264,6 +273,10 @@ local function makeIndexOrCall(t1, t2)
   return { tag = "Index", pos = t1.pos, end_pos = t2.end_pos, [1] = t1, [2] = t2[1] }
 end
 
+local function makeFn(start, params, body)
+  return { tag = "Fn", pos = start, end_pos = body.end_pos, [1] = params, [2] = body }
+end
+
 -- grammar
 local G = {
   V "Lua",
@@ -318,7 +331,10 @@ local G = {
   VarList      = tagC("VarList", commaSep(V "VarExpr", "VarList")),
   ExprList     = tagC("ExpList", commaSep(V "Expr", "ExprList")),
 
-  Expr         = V "OrExpr",
+  Expr         = V "PipeExpr",
+  PipeExpr     = chainOp(V "FnExpr", V "PipeOp", "PipeExpr"),
+  FnExpr       = Cp() * kw("fn") * V "FuncParams" * expect(V "OrExpr", "FnBody") / makeFn
+      + V "OrExpr",
   OrExpr       = chainOp(V "AndExpr", V "OrOp", "OrExpr"),
   AndExpr      = chainOp(V "RelExpr", V "AndOp", "AndExpr"),
   RelExpr      = chainOp(V "BOrExpr", V "RelOp", "RelExpr"),
@@ -445,7 +461,7 @@ local G = {
       + sym(">=") / "ge"
       + sym("<") / "lt"
       + sym(">") / "gt",
-  BOrOp        = sym("|") / "bor",
+  BOrOp        = sym("|") * -P ">" / "bor",
   BXorOp       = sym("~" * -P "=") / "bxor",
   BAndOp       = sym("&") / "band",
   ShiftOp      = sym("<<") / "shl"
@@ -462,6 +478,7 @@ local G = {
       + sym("#") / "len"
       + sym("~") / "bnot",
   PowOp        = sym("^") / "pow",
+  PipeOp       = sym("|>") / "pipe",
 }
 
 local parser = { detailed_errors = false }

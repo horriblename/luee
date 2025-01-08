@@ -172,7 +172,7 @@ function fieldlist2str(fieldlist)
   for k, v in ipairs(fieldlist) do
     local tag = v.tag
     if tag == "Pair" then -- `Pair{ expr expr }
-      l[k] = exp2str(v[1]) .. " = " .. exp2str(v[2])
+      l[k] = string.format("[%s]", exp2str(v[1])) .. " = " .. exp2str(v[2])
     else                  -- expr
       l[k] = exp2str(v)
     end
@@ -200,11 +200,13 @@ function exp2str(exp)
   elseif tag == "Function" then -- `Function{ { `Id{ <string> }* `Dots? } block }
     str = "function"
     str = str .. parlist2str(exp[1])
+    str = str .. "\n"
     str = str .. block2str(exp[2])
     str = str .. " end "
   elseif tag == "Fn" then
     str = "function"
-    str = str .. parlist2str(exp[1]) .. ", "
+    str = str .. parlist2str(exp[1])
+    str = str .. "return "
     str = str .. exp2str(exp[2])
     str = str .. " end "
   elseif tag == "Table" then -- `Table{ ( `Pair{ expr expr } | expr )* }
@@ -225,7 +227,8 @@ function exp2str(exp)
     str = exp2str(exp[1])
     str = str .. "("
     if exp[2] then
-      for i = 2, #exp do
+      str = str .. exp2str(exp[2])
+      for i = 3, #exp do
         str = str .. ", " .. exp2str(exp[i])
       end
     end
@@ -235,7 +238,8 @@ function exp2str(exp)
     str = str .. exp[2][1]    -- for some reason this is a `String
     str = str .. "("
     if exp[3] then
-      for i = 3, #exp do
+      str = str .. exp2str(exp[3])
+      for i = 4, #exp do
         str = str .. ", " .. exp2str(exp[i])
       end
     end
@@ -255,7 +259,7 @@ function explist2str(explist)
     l[k] = exp2str(v)
   end
   if #l > 0 then
-    return "{ " .. table.concat(l, ", ") .. " }"
+    return table.concat(l, ", ")
   else
     return ""
   end

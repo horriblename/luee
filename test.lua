@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 
-local parser = require "lua-parser.parser"
-local pp = require "lua-parser.pp"
+local parser = require "luee.parser"
+local pp = require "luee.pp"
 
 -- expected result, result, subject
 local e, r, s

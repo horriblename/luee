@@ -3,8 +3,6 @@ This module impements a pretty printer to the AST
 ]]
 local pp = {}
 
-local p = require('lua-parser.pp').print
-
 local block2str, stm2str, exp2str, var2str
 local explist2str, varlist2str, parlist2str, fieldlist2str
 

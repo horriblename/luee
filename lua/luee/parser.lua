@@ -483,7 +483,7 @@ local G = {
 
 local parser = { detailed_errors = false }
 
-local validator = require("lua-parser.validator")
+local validator = require("luee.validator")
 local validate = validator.validate
 local syntaxerror = validator.syntaxerror
 local offset_to_pos = validator.offset_to_pos

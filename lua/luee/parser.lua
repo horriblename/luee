@@ -179,10 +179,10 @@ local function expect(patt, label)
 end
 
 local function dbg(patt, msg)
-  return patt / function(...)
-    print("[dbg] on ", msg)
-    return ...
-  end
+  return Cmt(patt, function(_, pos, ...)
+    vim.print("[dbg] on ", ...)
+    return true
+  end)
 end
 
 -- regular combinators and auxiliary functions

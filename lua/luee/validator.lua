@@ -406,7 +406,7 @@ end
 
 ---@param src string
 ---@param offset integer
----@return {line: integer, col: integer}
+---@return {line: integer, col: integer, line_start: integer}
 local function offset_to_pos(src, offset)
   local lines = 0
   local prev_endline = 1
@@ -418,7 +418,24 @@ local function offset_to_pos(src, offset)
     prev_endline = match --[[@as integer]]
   end
 
-  return { line = lines + 1, col = offset - prev_endline + 1 }
+  return {
+    line = lines + 1,
+    col = offset - prev_endline + 1,
+    line_start = prev_endline + 1,
+  }
 end
 
-return { validate = traverse, syntaxerror = syntaxerror, offset_to_pos = offset_to_pos }
+-- FIXME: handle tabs
+--
+---@param src string
+---@param offset integer
+---@return string
+local function show_line(src, offset)
+  local pos = offset_to_pos(src, offset)
+  local linenr = tostring(pos.line)
+  local line_end = string.match(src, '()\n', pos.line_start) or #src + 1
+  return linenr .. "| " .. string.sub(src, pos.line_start, line_end - 1) .. "\n"
+      .. string.rep(" ", #linenr + 2 + pos.col - 1) .. "^\n"
+end
+
+return { validate = traverse, syntaxerror = syntaxerror, offset_to_pos = offset_to_pos, show_line = show_line }

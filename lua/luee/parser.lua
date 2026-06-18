@@ -487,12 +487,14 @@ local validator = require("luee.validator")
 local validate = validator.validate
 local syntaxerror = validator.syntaxerror
 local offset_to_pos = validator.offset_to_pos
+local show_line = validator.show_line
 
 ---@param subject any
 ---@param filename string
+---@param info boolean? whether to enable user-friendly messages
 ---@return any ast
----@return any error
-function parser.parse(subject, filename)
+---@return string? err
+function parser.parse(subject, filename, info)
   local errorinfo = { subject = subject, filename = filename }
   lpeg.setmaxstack(1000)
   local ok, ast = pcall(lpeg.match, G, subject, nil, errorinfo)
@@ -502,7 +504,10 @@ function parser.parse(subject, filename)
       error(err)
     end
     local pos = offset_to_pos(errorinfo.subject, err.offset)
-    local msg = string.format('%s:%d:%d: syntax error, %s', filename, pos.line, pos.col, err.errmsg)
+    local msg = info
+        and string.format('%s:%d:%d: syntax error, %s\n\n%s',
+          filename, pos.line, pos.col, err.errmsg, show_line(errorinfo.subject, err.offset))
+        or string.format('%s:%d:%d: syntax error, %s', filename, pos.line, pos.col, err.errmsg)
 
     return nil, msg
     -- if parser.detailed_errors then
@@ -521,6 +526,18 @@ function parser.parse(subject, filename)
     -- end
   end
   return validate(ast, errorinfo)
+end
+
+---@param file string
+---@param info boolean? whether to enable user-friendly messages
+---@return any ast
+---@return string? err
+function parser.parse_file(file, info)
+  local f, err = io.open(file, 'r')
+  if not f then return nil, err end
+  local content = f:read('a*')
+  f:close()
+  return parser.parse(content, file, info)
 end
 
 return parser

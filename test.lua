@@ -9,22 +9,31 @@ local e, r, s
 
 local filename = "test.lua"
 
+local pass_count = 0
+local fail_count = 0
+
 local function assert_eq(a, b)
   if a ~= b then
+    fail_count = fail_count + 1
     print("failed assertion at ", debug.getinfo(2).currentline)
-    print("  ", vim.inspect(a), "!=", vim.inspect(b))
+    local ta = vim.inspect(a)
+    local tb = vim.inspect(b)
+    print("  left: ", ta)
+    print("  right:", tb)
+  else
+    pass_count = pass_count + 1
   end
 end
 
 local function parse(s)
-  local t, m = parser.parse(s, filename)
-  local r
-  if not t then
-    r = m
+  local ast, err = parser.parse(s, filename)
+  local result
+  if not ast then
+    result = err
   else
-    r = pp.tostring(t)
+    result = pp.tostring(ast)
   end
-  return r .. "\n"
+  return result .. "\n"
 end
 
 local function fixint(s)
@@ -3824,4 +3833,8 @@ e = [=[
 r = parse(s)
 assert_eq(r, e)
 
-print("OK")
+if fail_count > 0 then
+  print('passed:', pass_count, 'failed:', fail_count)
+else
+  print("OK passed:", pass_count)
+end

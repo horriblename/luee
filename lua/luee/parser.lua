@@ -273,8 +273,8 @@ local function makeIndexOrCall(t1, t2)
   return { tag = "Index", pos = t1.pos, end_pos = t2.end_pos, [1] = t1, [2] = t2[1] }
 end
 
-local function makeFn(start, params, body)
-  return { tag = "Fn", pos = start, end_pos = body.end_pos, [1] = params, [2] = body }
+local function makeFn(start, params, body_start, body)
+  return { tag = "Fn", pos = start, end_pos = body.end_pos, pos_body = body_start, [1] = params, [2] = body }
 end
 
 -- grammar
@@ -333,7 +333,7 @@ local G = {
 
   Expr         = V "PipeExpr",
   PipeExpr     = chainOp(V "FnExpr", V "PipeOp", "PipeExpr"),
-  FnExpr       = Cp() * kw("fn") * V "FuncParams" * expect(V "OrExpr", "FnBody") / makeFn
+  FnExpr       = Cp() * kw("fn") * V "FuncParams" * Cp() * expect(V "OrExpr", "FnBody") / makeFn
       + V "OrExpr",
   OrExpr       = chainOp(V "AndExpr", V "OrOp", "OrExpr"),
   AndExpr      = chainOp(V "RelExpr", V "AndOp", "AndExpr"),

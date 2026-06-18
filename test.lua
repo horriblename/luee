@@ -425,7 +425,7 @@ s = [=[
 f = 9e
 ]=]
 e = [=[
-test.lua:2:1: syntax error, expected one or more digits for the exponent
+test.lua:1:7: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
@@ -435,7 +435,7 @@ s = [=[
 f = 5.e
 ]=]
 e = [=[
-test.lua:2:1: syntax error, expected one or more digits for the exponent
+test.lua:1:8: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
@@ -445,7 +445,7 @@ s = [=[
 f = .9e-
 ]=]
 e = [=[
-test.lua:2:1: syntax error, expected one or more digits for the exponent
+test.lua:1:9: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
@@ -455,7 +455,7 @@ s = [=[
 f = 5.9e+
 ]=]
 e = [=[
-test.lua:2:1: syntax error, expected one or more digits for the exponent
+test.lua:1:10: syntax error, expected one or more digits for the exponent
 ]=]
 
 r = parse(s)
@@ -509,7 +509,7 @@ ss6 = "testing unfinished string
 -- short string test end
 ]=]
 e = [=[
-test.lua:4:1: syntax error, unclosed string
+test.lua:3:33: syntax error, unclosed string
 ]=]
 
 r = parse(s)
@@ -525,7 +525,7 @@ string'
 -- short string test end
 ]=]
 e = [=[
-test.lua:4:1: syntax error, unclosed string
+test.lua:3:18: syntax error, unclosed string
 ]=]
 
 r = parse(s)
@@ -3661,7 +3661,7 @@ s = [=[
 local message = "Hello
 ]=]
 e = [=[
-test.lua:2:1: syntax error, unclosed string
+test.lua:1:23: syntax error, unclosed string
 ]=]
 
 r = parse(s)
@@ -3673,7 +3673,7 @@ Welcome
 *******"
 ]=]
 e = [=[
-test.lua:2:1: syntax error, unclosed string
+test.lua:1:25: syntax error, unclosed string
 ]=]
 
 r = parse(s)
@@ -3683,7 +3683,7 @@ s = [=[
 local message = 'Hello
 ]=]
 e = [=[
-test.lua:2:1: syntax error, unclosed string
+test.lua:1:23: syntax error, unclosed string
 ]=]
 
 r = parse(s)
@@ -3695,7 +3695,7 @@ Welcome
 *******'
 ]=]
 e = [=[
-test.lua:2:1: syntax error, unclosed string
+test.lua:1:25: syntax error, unclosed string
 ]=]
 
 r = parse(s)

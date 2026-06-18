@@ -409,9 +409,11 @@ end
 ---@return {line: integer, col: integer, line_start: integer}
 local function offset_to_pos(src, offset)
   local lines = 0
-  local prev_endline = 1
+  local prev_endline = 0
   for match in string.gmatch(src, '()\n') do
-    if match > offset then
+    -- if offset is on a newline, consider that as part of the previous line
+    -- e.g. 'abc\ndef' with offset=4 => line 1 col 4
+    if match >= offset then
       break
     end
     lines = lines + 1
@@ -420,7 +422,7 @@ local function offset_to_pos(src, offset)
 
   return {
     line = lines + 1,
-    col = offset - prev_endline + 1,
+    col = offset - prev_endline,
     line_start = prev_endline + 1,
   }
 end

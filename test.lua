@@ -1458,6 +1458,30 @@ test.lua:1:9: syntax error, expected an expression after the multiplicative oper
 r = parse(s)
 assert_eq(r, e)
 
+-- pipes
+
+s = [=[
+a = b |> fn(x) x + 1 |>
+]=]
+e = [=[
+test.lua:2:1: syntax error, expected an expression after '|>'
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- fn expressions
+
+s = [=[
+a = fn()
+]=]
+e = [=[
+test.lua:2:1: syntax error, expected an expression after fn(...)
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
 -- bitwise expressions
 
 s = [=[

@@ -1,3 +1,4 @@
+---@module 'luee.types'
 --[[
 This module impements a pretty printer to the AST
 ]]
@@ -18,7 +19,7 @@ end
 local function fixed_string(str)
   local new_str = ""
   for i = 1, string.len(str) do
-    char = string.byte(str, i)
+    local char = string.byte(str, i)
     if char == 34 then
       new_str = new_str .. string.format("\\\"")
     elseif char == 92 then
@@ -312,6 +313,8 @@ function explist2str(explist)
   end
 end
 
+---@param stm Stmt
+---@return string
 function stm2str(stm)
   local tag = stm.tag
   local str = ''      --TODO: make nil

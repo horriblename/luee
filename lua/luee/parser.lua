@@ -178,6 +178,28 @@ local function expect(patt, label)
   return patt + throw(label)
 end
 
+-- like expect, but with some hacks to make sure errors are thrown even at EOF
+--
+-- The way to use this is basically, take any (A * expect(B, err)) pattern
+-- and use expectClosing(A, B, err) instead
+--
+-- It hurts readability a bit so I'm only using it for better error message where
+-- it matters (anywhere a closing end, bracket, etc. is expected) or for test
+-- compatibility
+--
+-- There's quite a bit of backtracking on the error case but 1. it's an error case
+-- that can only happen once per parse, and 2. lpeg might memoize it idk
+---@param patt any preceding pattern
+---@param close any the closing token
+---@param err string
+---@return unknown
+local function expectClosing(patt, close, err)
+  local label = assert(labels["Err" .. err], "unknown error label: " .. err)
+  return patt * close + Cmt(patt, function(_, pos)
+    error({ offset = pos, errmsg = label })
+  end)
+end
+
 local function dbg(patt, msg)
   return Cmt(patt, function(_, pos, ...)
     vim.print("[dbg] on ", ...)
@@ -221,7 +243,7 @@ end
 
 local function sepBy(patt, sep, label)
   if label then
-    return patt * Cg(sep * expect(patt, label)) ^ 0
+    return patt * Cg(expectClosing(sep, patt, label)) ^ 0
   else
     return patt * Cg(sep * patt) ^ 0
   end
@@ -290,18 +312,18 @@ local G = {
       + V "FuncCall" + V "Assignment" + sym(";") + -V "BlockEnd" * throw("InvalidStat"),
   BlockEnd     = P "return" + "end" + "elseif" + "else" + "until" + -1,
 
-  IfStat       = tagC("If", V "IfPart" * V "ElseIfPart" ^ 0 * V "ElsePart" ^ -1 * expect(kw("end"), "EndIf")),
+  IfStat       = tagC("If", V "IfPart" * V "ElseIfPart" ^ 0 * expectClosing(V "ElsePart" ^ -1, kw("end"), "EndIf")),
   IfPart       = kw("if") * expect(V "Expr", "ExprIf") * expect(kw("then"), "ThenIf") * V "Block",
   ElseIfPart   = kw("elseif") * expect(V "Expr", "ExprEIf") * expect(kw("then"), "ThenEIf") * V "Block",
   ElsePart     = kw("else") * V "Block",
 
-  DoStat       = kw("do") * V "Block" * expect(kw("end"), "EndDo") / tagDo,
+  DoStat       = kw("do") * expectClosing(V "Block", kw("end"), "EndDo") / tagDo,
   WhileStat    = tagC("While", kw("while") * expect(V "Expr", "ExprWhile") * V "WhileBody"),
-  WhileBody    = expect(kw("do"), "DoWhile") * V "Block" * expect(kw("end"), "EndWhile"),
+  WhileBody    = expect(kw("do"), "DoWhile") * expectClosing(V "Block", kw("end"), "EndWhile"),
   RepeatStat   = tagC("Repeat",
-    kw("repeat") * V "Block" * expect(kw("until"), "UntilRep") * expect(V "Expr", "ExprRep")),
+    kw("repeat") * expectClosing(V "Block", kw("until"), "UntilRep") * expect(V "Expr", "ExprRep")),
 
-  ForStat      = kw("for") * expect(V "ForNum" + V "ForIn", "ForRange") * expect(kw("end"), "EndFor"),
+  ForStat      = kw("for") * expectClosing(expect(V "ForNum" + V "ForIn", "ForRange"), kw("end"), "EndFor"),
   ForNum       = tagC("Fornum", V "Id" * sym("=") * V "NumRange" * V "ForBody"),
   NumRange     = expect(V "Expr", "ExprFor1") * expect(sym(","), "CommaFor") * expect(V "Expr", "ExprFor2")
       * (sym(",") * expect(V "Expr", "ExprFor3")) ^ -1,
@@ -309,21 +331,21 @@ local G = {
     V "NameList" * expect(kw("in"), "InFor") * expect(V "ExprList", "EListFor") * V "ForBody"),
   ForBody      = expect(kw("do"), "DoFor") * V "Block",
 
-  LocalStat    = kw("local") * expect(V "LocalFunc" + V "LocalAssign", "DefLocal"),
+  LocalStat    = expectClosing(kw("local"), V "LocalFunc" + V "LocalAssign", "DefLocal"),
   LocalFunc    = tagC("Localrec", kw("function") * expect(V "Id", "NameLFunc") * V "FuncBody") / fixFuncStat,
-  LocalAssign  = tagC("Local", V "NameList" * (sym("=") * expect(V "ExprList", "EListLAssign") + Ct(Cc()))),
+  LocalAssign  = tagC("Local", V "NameList" * (expectClosing(sym("="), V "ExprList", "EListLAssign") + Ct(Cc()))),
   Assignment   = tagC("Set", V "VarList" * sym("=") * expect(V "ExprList", "EListAssign")),
 
   FuncStat     = tagC("Set", kw("function") * expect(V "FuncName", "FuncName") * V "FuncBody") / fixFuncStat,
   FuncName     = Cf(V "Id" * (sym(".") * expect(V "StrId", "NameFunc1")) ^ 0, insertIndex)
       * (sym(":") * expect(V "StrId", "NameFunc2")) ^ -1 / markMethod,
-  FuncBody     = tagC("Function", V "FuncParams" * V "Block" * expect(kw("end"), "EndFunc")),
+  FuncBody     = tagC("Function", V "FuncParams" * expectClosing(V "Block", kw("end"), "EndFunc")),
   FuncParams   = expect(sym("("), "OParenPList") * V "ParList" * expect(sym(")"), "CParenPList"),
   ParList      = V "NameList" * (sym(",") * expect(tagC("Dots", sym("...")), "ParList")) ^ -1 / addDots
       + Ct(tagC("Dots", sym("...")))
       + Ct(Cc()), -- Cc({}) generates a bug since the {} would be shared across parses
 
-  LabelStat    = tagC("Label", sym("::") * expect(V "Name", "Label") * expect(sym("::"), "CloseLabel")),
+  LabelStat    = tagC("Label", sym("::") * expectClosing(expect(V "Name", "Label"), sym("::"), "CloseLabel")),
   GoToStat     = tagC("Goto", kw("goto") * expect(V "Name", "Goto")),
   BreakStat    = tagC("Break", kw("break")),
   RetStat      = tagC("Return", kw("return") * commaSep(V "Expr", "RetList") ^ -1 * sym(";") ^ -1),
@@ -364,15 +386,17 @@ local G = {
   VarExpr      = Cmt(V "SuffixedExpr", function(s, i, exp) return exp.tag == "Id" or exp.tag == "Index", exp end),
 
   SuffixedExpr = Cf(V "PrimaryExpr" * (V "Index" + V "Call") ^ 0, makeIndexOrCall),
-  PrimaryExpr  = V "Id" + tagC("Paren", sym("(") * expect(V "Expr", "ExprParen") * expect(sym(")"), "CParenExpr")),
-  Index        = tagC("DotIndex", sym("." * -P ".") * expect(V "StrId", "NameIndex"))
-      + tagC("ArrayIndex", sym("[" * -P(S "=[")) * expect(V "Expr", "ExprIndex") * expect(sym("]"), "CBracketIndex")),
+  PrimaryExpr  = V "Id" + tagC("Paren", sym("(") * expectClosing(expect(V "Expr", "ExprParen"), sym(")"), "CParenExpr")),
+  Index        = tagC("DotIndex", expectClosing(sym("." * -P "."), V "StrId", "NameIndex"))
+      + tagC("ArrayIndex",
+        sym("[" * -P(S "=["))
+        * expectClosing(expect(V "Expr", "ExprIndex"), sym("]"), "CBracketIndex")),
   Call         = tagC("Invoke",
-        Cg(sym(":" * -P ":") * expect(V "StrId", "NameMeth") * expect(V "FuncArgs", "MethArgs")))
+        Cg(expectClosing(expectClosing(sym(":" * -P ":"), V "StrId", "NameMeth"), V "FuncArgs", "MethArgs")))
       + tagC("Call", V "FuncArgs"),
 
   FuncDef      = kw("function") * V "FuncBody",
-  FuncArgs     = sym("(") * commaSep(V "Expr", "ArgList") ^ -1 * expect(sym(")"), "CParenArgs")
+  FuncArgs     = sym("(") * expectClosing(commaSep(V "Expr", "ArgList") ^ -1, sym(")"), "CParenArgs")
       + V "Table"
       + tagC("String", V "String"),
 
@@ -447,8 +471,13 @@ local G = {
         + throw("EscSeq")
       ),
 
-  LongStr      = V "Open" * C((P(1) - V "CloseEq") ^ 0) * expect(V "Close", "CloseLStr") /
-      function(s, eqs) return s end,
+  LongStr      = V "Open" *
+      (expectClosing(
+        C((P(1) - V "CloseEq") ^ 0),
+        V "Close",
+        "CloseLStr"
+      ))
+      / function(s, eqs) return s end,
   Open         = "[" * Cg(V "Equals", "openEq") * "[" * P "\n" ^ -1,
   Close        = "]" * C(V "Equals") * "]",
   Equals       = P "=" ^ 0,

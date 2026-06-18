@@ -15,7 +15,10 @@ local fail_count = 0
 local function assert_eq(a, b)
   if a ~= b then
     fail_count = fail_count + 1
-    print("failed assertion at ", debug.getinfo(2).currentline)
+
+    local maybe_source_file = debug.getinfo(2).source:gsub('^@', '')
+    print(maybe_source_file .. ':' .. debug.getinfo(2).currentline .. ':',
+      "failed assertion a == b")
     local ta = vim.inspect(a)
     local tb = vim.inspect(b)
     print("  left: ", ta)

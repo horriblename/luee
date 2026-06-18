@@ -164,8 +164,10 @@ local function throw(label)
   label = "Err" .. label
   if labels[label] then
     return Cmt(P(1), function(subject, pos)
-      print("[dbg]", vim.inspect(label))
-      error({ offset = pos, errmsg = labels[label] })
+      error({
+        offset = pos - 1, -- adjust for offset from P(1)
+        errmsg = labels[label]
+      })
     end)
   end
 

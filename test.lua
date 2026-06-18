@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+-- luacheck: globals vim, no max line length
 
 local parser = require "luee.parser"
 local pp = require "luee.pp"
@@ -28,8 +28,8 @@ local function assert_eq(a, b)
   end
 end
 
-local function parse(s)
-  local ast, err = parser.parse(s, filename)
+local function parse(src)
+  local ast, err = parser.parse(src, filename)
   local result
   if not ast then
     result = err
@@ -39,8 +39,8 @@ local function parse(s)
   return result .. "\n"
 end
 
-local function fixint(s)
-  return _VERSION < "Lua 5.3" and s:gsub("%.0", "") or s
+local function fixint(str)
+  return _VERSION < "Lua 5.3" and str:gsub("%.0", "") or str
 end
 
 print("> testing lexer...")
@@ -1986,6 +1986,9 @@ e = [=[
 test.lua:1:16: syntax error, unexpected token, invalid start of statement
 ]=]
 
+r = parse(s)
+assert_eq(r, e)
+
 s = [=[
 x = -
 y = 2
@@ -3278,7 +3281,7 @@ test.lua:1:9: syntax error, expected an expression after '^'
 ]=]
 
 r = parse(s)
--- assert(r == e)
+assert_eq(r, e)
 
 -- ErrExprParen
 s = [=[

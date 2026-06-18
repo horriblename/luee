@@ -356,7 +356,7 @@ local G = {
 
   Expr         = V "PipeExpr",
   PipeExpr     = chainOp(V "FnExpr", V "PipeOp", "PipeExpr"),
-  FnExpr       = Cp() * kw("fn") * V "FuncParams" * Cp() * expect(V "OrExpr", "FnBody") / makeFn
+  FnExpr       = Cp() * kw("fn") * V "FuncParams" * expectClosing(Cp(), V "OrExpr", "FnBody") / makeFn
       + V "OrExpr",
   OrExpr       = chainOp(V "AndExpr", V "OrOp", "OrExpr"),
   AndExpr      = chainOp(V "RelExpr", V "AndOp", "AndExpr"),

@@ -2,6 +2,7 @@
 
 local parser = require "luee.parser"
 local pp = require "luee.pp"
+local validator = require "luee.validator"
 
 -- expected result, result, subject
 local e, r, s
@@ -31,6 +32,40 @@ local function fixint(s)
 end
 
 print("> testing lexer...")
+
+-- utility functions
+
+local pos
+
+-- offset on first char
+pos = validator.offset_to_pos("abc\ndef", 1)
+assert_eq(pos.line, 1)
+assert_eq(pos.col, 1)
+assert_eq(pos.line_start, 1)
+
+-- newline is part of previous line
+pos = validator.offset_to_pos("abc\ndef", 4)
+assert_eq(pos.line, 1)
+assert_eq(pos.col, 4)
+assert_eq(pos.line_start, 1)
+
+-- offset on end of first line
+pos = validator.offset_to_pos("abc\ndef", 3)
+assert_eq(pos.line, 1)
+assert_eq(pos.col, 3)
+assert_eq(pos.line_start, 1)
+
+-- offset on start of second line
+pos = validator.offset_to_pos("abc\ndef", 5)
+assert_eq(pos.line, 2)
+assert_eq(pos.col, 1)
+assert_eq(pos.line_start, 5)
+
+-- offset on end of first line
+pos = validator.offset_to_pos("abc\ndef", 7)
+assert_eq(pos.line, 2)
+assert_eq(pos.col, 3)
+assert_eq(pos.line_start, 5)
 
 -- syntax ok
 

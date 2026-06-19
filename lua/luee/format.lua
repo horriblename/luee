@@ -183,6 +183,43 @@ function fieldlist2str(fieldlist)
   end
 end
 
+local function methpipe2str(exp)
+  local lhs = exp[2]
+  local rhs = exp[3]
+  if rhs.tag == "Call" then
+    local call = {
+      tag = "Invoke",
+      pos = exp.pos,
+      end_pos = exp.end_pos,
+      [1] = lhs,
+      [2] = rhs[1],
+      [3] = rhs[2],
+    }
+    for i = 3, #exp[3] do
+      call[i + 1] = exp[3][i]
+    end
+
+    return exp2str(call)
+  elseif rhs.tag == "Id" then
+    local call = {
+      tag = "Invoke",
+      pos = exp.pos,
+      end_pos = exp.end_pos,
+      [1] = lhs,
+      [2] = {
+        tag = "String",
+        pos = rhs.pos,
+        end_pos = rhs.end_pos,
+        rhs[1],
+      },
+    }
+
+    return exp2str(call)
+  end
+
+  error("TODO: x :> anyExpression")
+end
+
 local function pipe2str(exp)
   local lhs = exp[2]
   local rhs = exp[3]
@@ -263,6 +300,8 @@ function exp2str(exp)
   elseif tag == "Op" then    -- `Op{ opid expr expr? }
     if exp[1] == "pipe" then
       return pipe2str(exp)
+    elseif exp[1] == "methpipe" then
+      return methpipe2str(exp)
     end
     str = exp2str(exp[2])
     str = str .. op2str(exp[1])
@@ -454,6 +493,210 @@ function pp.dump(t, i)
     end
   end
   io.write(string.format("%s}\n", string.rep(" ", i)))
+end
+
+---@class visitor
+---@field on_stm fun(Stm): any
+---@field on_exp fun(Expr): any
+local visit_block, visit_stm, visit_exp
+
+---@param stm Stmt
+---@param visitor visitor
+---@return any
+function visit_stm(stm, visitor)
+  visitor.on_stm(stm)
+  local tag = stm.tag
+  local str = ''
+  if tag == "Do" then -- `Do{ stat* }
+    local l = {}
+    for k, v in ipairs(stm) do
+      l[k] = visit_stm(v)
+    end
+  elseif tag == "Set" then -- `Set{ {lhs+} {expr+} }
+    -- str = varlist2str(stm[1]) .. " = "
+    for _, exp in ipairs(stm[2]) do
+      visit_exp(stm, visitor)
+    end
+    str = str .. explist2str(stm[2])
+  elseif tag == "While" then -- `While{ expr block }
+    str = "while "
+    str = str .. exp2str(stm[1]) .. " do\n"
+    str = str .. block2str(stm[2])
+    str = str .. "end\n"
+  elseif tag == "Repeat" then -- `Repeat{ block expr }
+    str = str .. "repeat\n"
+    str = str .. block2str(stm[1]) .. "\n"
+    str = str .. "until " .. exp2str(stm[2])
+  elseif tag == "If" then -- `If{ (expr block)+ block? }
+    str = "if "
+    local len = #stm
+    if len % 2 == 0 then
+      local l = {}
+      for i = 1, len - 2, 2 do
+        str = str .. exp2str(stm[i]) .. ", " .. block2str(stm[i + 1]) .. "\n"
+      end
+      str = str .. exp2str(stm[len - 1]) .. ", " .. block2str(stm[len])
+    else
+      local l = {}
+      for i = 1, len - 3, 2 do
+        str = str .. exp2str(stm[i]) .. ", " .. block2str(stm[i + 1]) .. ", "
+      end
+      str = str .. exp2str(stm[len - 2]) .. ", " .. block2str(stm[len - 1]) .. ", "
+      str = str .. block2str(stm[len])
+    end
+    str = str .. "end\n"
+  elseif tag == "Fornum" then -- `Fornum{ ident expr expr expr? block }
+    str = "for "
+    str = str .. var2str(stm[1])
+    str = str .. " = "
+    str = str .. exp2str(stm[2]) .. ", "
+    str = str .. exp2str(stm[3])
+    if stm[5] then -- optional step
+      str = str .. "," .. exp2str(stm[4])
+    end
+    str = str .. "\n"
+    str = str .. block2str(stm[4])
+    str = str .. "end\n"
+  elseif tag == "Forin" then -- `Forin{ {ident+} {expr+} block }
+    str = "for "
+    str = str .. varlist2str(stm[1])
+    str = str .. " in "
+    str = str .. explist2str(stm[2]) .. "\n"
+    str = str .. block2str(stm[3])
+    str = str .. "\nend\n"
+  elseif tag == "Local" then -- `Local{ {ident+} {expr+}? }
+    str = "local "
+    str = str .. varlist2str(stm[1])
+    if #stm[2] > 0 then
+      str = str .. " = "
+      str = str .. explist2str(stm[2])
+    end
+  elseif tag == "Localrec" then -- `Localrec{ ident expr }
+    str = "local function "
+    str = str .. var2str(stm[1][1])
+    local func = stm[2][1]
+    str = str .. parlist2str(func[1])
+    str = str .. "\n"
+    str = str .. block2str(func[2])
+    str = str .. "end\n"
+  elseif tag == "Goto" then   -- `Goto{ <string> }
+    str = "goto " .. name2str(stm[1]) .. "\n"
+  elseif tag == "Label" then  -- `Label{ <string> }
+    str = name2str(stm[1]) .. ":\n"
+  elseif tag == "Return" then -- `Return{ <expr>* }
+    str = "return " .. explist2str(stm) .. "\n"
+  elseif tag == "Break" then
+    str = "break\n"
+  elseif tag == "Call" then -- `Call{ expr expr* }
+    str = exp2str(stm[1]) .. "("
+    if stm[2] then
+      str = str .. exp2str(stm[2])
+      for i = 3, #stm do
+        str = str .. ", " .. exp2str(stm[i])
+      end
+    end
+    str = str .. ")\n"
+  elseif tag == "Invoke" then -- `Invoke{ expr `String{ <string> } expr* }
+    str = exp2str(stm[1]) .. ":"
+
+    str = str .. stm[2][1] .. "(" --for some reason this is a `String
+    if stm[3] then
+      str = str .. exp2str(stm[3])
+      for i = 4, #stm do
+        str = str .. ", " .. exp2str(stm[i])
+      end
+    end
+    str = str .. ")"
+  else
+    error("expecting a statement, but got a " .. tag)
+  end
+  return str
+end
+
+local diff_block, diff_stm, diff_exp
+
+---@param block Block
+---@return table
+function diff_block(block)
+  for _, s in ipairs(block) do
+  end
+end
+
+---@param exp Expr
+---@param diffs diff[]
+function diff_exp(exp, diffs)
+  local tag = exp.tag
+  if tag == "Fn" then
+    ---@cast exp FnExpr
+    diffs[#diffs + 1] = {
+      start = exp.pos,
+      finish = exp.pos + 1,
+      text = "function",
+    }
+    diffs[#diffs + 1] = {
+      start = exp.pos_body,
+      finish = exp.pos_body,
+      text = " return "
+    }
+    diffs[#diffs + 1] = {
+      start = exp.end_pos,
+      finish = exp.end_pos,
+      text = "\nend"
+    }
+  elseif tag == "Op" and exp[1] == "pipe" then -- `Op{ opid expr expr? }
+    diffs[#diffs + 1] = {
+      start = exp.pos,
+      finish = exp.pos,
+      text = "function()\n local _temp = ",
+    }
+    diffs[#diffs + 1] = {
+      -- idk if this is guaranteed to exist
+      start = assert(exp[2].end_pos) + 1,
+      finish = exp[2].end_pos + 1,
+      text = "; "
+    }
+  elseif tag == "Paren" then -- `Paren{ expr }
+    str = "( " .. exp2str(exp[1]) .. " )"
+  elseif tag == "Call" then  -- `Call{ expr expr* }
+    str = exp2str(exp[1])
+    str = str .. "("
+    if exp[2] then
+      str = str .. exp2str(exp[2])
+      for i = 3, #exp do
+        str = str .. ", " .. exp2str(exp[i])
+      end
+    end
+    str = str .. ")"
+  elseif tag == "Invoke" then -- `Invoke{ expr `String{ <string> } expr* }
+    str = exp2str(exp[1]) .. ":"
+    str = str .. exp[2][1]    -- for some reason this is a `String
+    str = str .. "("
+    if exp[3] then
+      str = str .. exp2str(exp[3])
+      for i = 4, #exp do
+        str = str .. ", " .. exp2str(exp[i])
+      end
+    end
+    str = str .. ")"
+  elseif tag == "Id" or   -- `Id{ <string> }
+      tag == "Index" then -- `Index{ expr expr }
+    str = var2str(exp)
+  else
+    error("expecting an expression, but got a " .. tag)
+  end
+  return str
+end
+
+function diff_stm(stm, diffs) end
+
+---@param stm Stmt
+---@return diff[]
+function pp.diff_stm(stm)
+  local visitor = { diffs = {} }
+  visitor.on_exp = function(e) diff_exp(e, visitor.diffs) end
+  visitor.on_stm = function(e) diff_stm(e, visitor.diffs) end
+  visit_stm(stm, visitor)
+  return visitor.diffs
 end
 
 return pp

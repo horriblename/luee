@@ -119,10 +119,10 @@ assert_eq(r, e)
 s = [[
 x = 0 |> f()
 
-y = f() |> g() |> h
+y = f() |> g() >: h
 ]]
 e = [=[
-{ `Set{ { `Id "x" }, { `Op{ "pipe", `Number "0", `Call{ `Id "f" } } } }, `Set{ { `Id "y" }, { `Op{ "pipe", `Op{ "pipe", `Call{ `Id "f" }, `Call{ `Id "g" } }, `Id "h" } } } }
+{ `Set{ { `Id "x" }, { `Op{ "pipe", `Number "0", `Call{ `Id "f" } } } }, `Set{ { `Id "y" }, { `Op{ "methpipe", `Op{ "pipe", `Call{ `Id "f" }, `Call{ `Id "g" } }, `Id "h" } } } }
 ]=]
 
 r = parse(s)

@@ -490,7 +490,7 @@ local G = {
       + sym("<=") / "le"
       + sym(">=") / "ge"
       + sym("<") / "lt"
-      + sym(">") / "gt",
+      + sym(">") * -P(":") / "gt",
   BOrOp        = sym("|") * -P ">" / "bor",
   BXorOp       = sym("~" * -P "=") / "bxor",
   BAndOp       = sym("&") / "band",
@@ -508,7 +508,7 @@ local G = {
       + sym("#") / "len"
       + sym("~") / "bnot",
   PowOp        = sym("^") / "pow",
-  PipeOp       = sym("|>") / "pipe",
+  PipeOp       = sym("|>") / "pipe" + sym(">:") / "methpipe",
 }
 
 local parser = { detailed_errors = false }

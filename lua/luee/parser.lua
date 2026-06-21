@@ -116,6 +116,7 @@ local labels = {
 
   ["ErrFnBody"] = "expected an expression after fn(...)",
 
+  ["ErrAssExpr"] = "expected an expression after '=' in assignment expression",
   ["ErrPipeExpr"] = "expected an expression after '|>'",
   ["ErrOrExpr"] = "expected an expression after 'or'",
   ["ErrAndExpr"] = "expected an expression after 'and'",
@@ -355,7 +356,8 @@ local G = {
   VarList      = tagC("VarList", commaSep(V "VarExpr", "VarList")),
   ExprList     = tagC("ExpList", commaSep(V "Expr", "ExprList")),
 
-  Expr         = V "PipeExpr",
+  Expr         = V "AssExpr",
+  AssExpr      = chainOp(V "PipeExpr", V "AssOp", "AssExpr"),
   PipeExpr     = chainOp(V "FnExpr", V "PipeOp", "PipeExpr"),
   FnExpr       = Cp() * kw("fn") * V "FuncParams" * expectClosing(Cp(), V "OrExpr", "FnBody") / makeFn
       + V "OrExpr",
@@ -515,6 +517,7 @@ local G = {
       + sym("~") / "bnot",
   PowOp        = sym("^") / "pow",
   PipeOp       = sym("|>") / "pipe" + sym(">:") / "methpipe",
+  AssOp        = sym("=") * -P("=") / "assign",
 }
 
 local parser = { detailed_errors = false }

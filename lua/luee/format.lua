@@ -117,6 +117,8 @@ local function op2str(op)
     return "~"
   elseif op == "pow" then
     return "^"
+  elseif op == "assign" then
+    error("BUG: tried to use assignment operator as a normal operator")
   end
 
   error("invalid operator: " .. op)
@@ -219,7 +221,37 @@ local function methpipe2str(exp)
     return exp2str(call)
   end
 
-  error("TODO: x :> anyExpression")
+  error("TODO: x >: anyExpression")
+end
+
+local function assignexpr2str(exp)
+  local func = {
+    tag = "Function",
+    pos = exp.pos,
+    end_pos = exp.end_pos,
+    {},
+    {
+      tag = "Block",
+      pos = exp.pos,
+      end_pos = exp.end_pos,
+      {
+        tag = "Set",
+        { exp[2] },
+        { exp[3] },
+      },
+      {
+        tag = "Return",
+        exp[2],
+      },
+    },
+  }
+  local call = {
+    tag = "Call",
+    pos = exp.pos,
+    end_pos = exp.end_pos,
+    [1] = { tag = "Paren", func },
+  }
+  return exp2str(call)
 end
 
 local function pipe2str(exp)
@@ -304,6 +336,8 @@ function exp2str(exp)
       return pipe2str(exp)
     elseif exp[1] == "methpipe" then
       return methpipe2str(exp)
+    elseif exp[1] == "assign" then
+      return assignexpr2str(exp)
     end
     str = exp2str(exp[2])
     str = str .. op2str(exp[1])

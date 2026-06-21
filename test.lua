@@ -1653,7 +1653,7 @@ s = [=[
 x = a.1e3
 ]=]
 e = [=[
-test.lua:1:8: syntax error, unexpected token, invalid start of statement\n
+test.lua:1:8: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)

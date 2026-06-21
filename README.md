@@ -64,3 +64,42 @@ registers, the character after `@` is taken as the
 " transpiles to
 :lua= reg["+"] = reg["a"]
 ```
+
+## Assignment as expression
+
+Single variable assignment `a = b` is now possible. Multi-variable ones
+`a, b = c, d` are not allowed
+
+```vim
+:Luee a = b
+" transpiles to
+:lua= (function() a = b; return a end)()
+
+:Luee a = (b = c + d),
+" transpiles to
+:lua= (function()
+    \    a = (
+    \      function()
+    \          b = c + d
+    \          return b end
+    \    )();
+    \    return a 
+    \ end)()
+```
+
+> [!WARN]
+>
+> With this extension, some syntax errors in base Lua is now accepted:
+>
+> ```lua
+> -- lua, syntax error
+> x = -
+> y = 3
+> ```
+>
+> is parsed in Luee as
+>
+> ```lua
+> -- Luee
+> x = -(y = 3)
+> ```

@@ -154,6 +154,18 @@ e = [=[
 r = parse(s)
 assert_eq(r, e)
 
+-- assignment as expr
+
+s = [[
+x = x = b
+]]
+e = [=[
+{ `Set{ { `Id "x" }, { `Op{ "assign", `Id "x", `Id "b" } } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
 -- floating points
 
 s = [=[
@@ -2048,22 +2060,24 @@ test.lua:1:9: syntax error, unexpected token, invalid start of statement
 r = parse(s)
 assert_eq(r, e)
 
+-- NOTE: was syntax error in base lua
 s = [=[
 local a = 1, b = 2
 ]=]
 e = [=[
-test.lua:1:16: syntax error, unexpected token, invalid start of statement
+{ `Local{ { `Id "a" }, { `Number "1", `Op{ "assign", `Id "b", `Number "2" } } } }
 ]=]
 
 r = parse(s)
 assert_eq(r, e)
 
+-- NOTE: was syntax error in base lua
 s = [=[
 x = -
 y = 2
 ]=]
 e = [=[
-test.lua:2:3: syntax error, unexpected token, invalid start of statement
+{ `Set{ { `Id "x" }, { `Op{ "assign", `Op{ "unm", `Id "y" }, `Number "2" } } } }
 ]=]
 
 r = parse(s)
@@ -3654,11 +3668,12 @@ r = parse(s)
 assert_eq(r, e)
 
 -- ErrCBracketFKey
+-- NOTE: error location moved due to assignment expr
 s = [=[
 table = { [key = value }
 ]=]
 e = [=[
-test.lua:1:16: syntax error, expected ']' to close the table key
+test.lua:1:24: syntax error, expected ']' to close the table key
 ]=]
 
 r = parse(s)

@@ -2,8 +2,11 @@
 
 **Lu**a **E**xtended **E**xpressions
 
-Transpiler that adds support for short-hand function expression and pipe
+Transpiler that adds support for various short-hand expressions and pipe
 operator to lua.
+
+Personal project, I will make breaking changes whenever I feel, and will cater
+to my own needs.
 
 This is designed as a "REPL-only" language. That is to say, don't actually write
 in Luee in your files, it's only useful for typing hacky pipelines on your
@@ -48,4 +51,16 @@ Pipe operators have the weakest binding power
 
 " transpiles to
 :lua= vim.iter(vim.opt.rtp:get()):filter(function(x) return x:match('luee') end)
+```
+
+## @ token
+
+Used in conjunction with the separately added `reg` global, gets/sets vim
+registers, the character after `@` is taken as the
+
+```vim
+:Luee @+ = @a
+
+" transpiles to
+:lua= reg["+"] = reg["a"]
 ```

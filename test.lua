@@ -184,10 +184,10 @@ assert_eq(r, e)
 -- assignment as expr
 
 s = [[
-x = x = b
+x = a = b = c
 ]]
 e = [=[
-{ `Set{ { `Id "x" }, { `Op{ "assign", `Id "x", `Id "b" } } } }
+{ `Set{ { `Id "x" }, { `Op{ "assign", `Id "a", `Op{ "assign", `Id "b", `Id "c" } } } } }
 ]=]
 
 r = parse(s)
@@ -2104,7 +2104,7 @@ x = -
 y = 2
 ]=]
 e = [=[
-{ `Set{ { `Id "x" }, { `Op{ "assign", `Op{ "unm", `Id "y" }, `Number "2" } } } }
+test.lua:1:5: syntax error, expected one or more expressions after '='
 ]=]
 
 r = parse(s)

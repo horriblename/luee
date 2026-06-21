@@ -357,7 +357,8 @@ local G = {
   ExprList     = tagC("ExpList", commaSep(V "Expr", "ExprList")),
 
   Expr         = V "AssExpr",
-  AssExpr      = chainOp(V "PipeExpr", V "AssOp", "AssExpr"),
+  AssExpr      = V "PipeExpr" * -V "AssOp"
+      + V "VarExpr" * (expectClosing(V "AssOp", V "AssExpr", "AssExpr")) ^ -1 / binaryOp,
   PipeExpr     = chainOp(V "FnExpr", V "PipeOp", "PipeExpr"),
   FnExpr       = Cp() * kw("fn") * V "FuncParams" * expectClosing(Cp(), V "OrExpr", "FnBody") / makeFn
       + V "OrExpr",

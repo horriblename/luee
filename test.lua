@@ -193,6 +193,66 @@ e = [=[
 r = parse(s)
 assert_eq(r, e)
 
+-- dot index with double-quoted string
+
+s = [=[
+x = a."b"
+]=]
+e = [=[
+{ `Set{ { `Id "x" }, { `Index{ `Id "a", `String "b" } } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- dot index with single-quoted string
+
+s = [=[
+x = a.'b'
+]=]
+e = [=[
+{ `Set{ { `Id "x" }, { `Index{ `Id "a", `String "b" } } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- dot index with integer
+
+s = [=[
+x = a.1
+]=]
+e = [=[
+{ `Set{ { `Id "x" }, { `Index{ `Id "a", `Number "1" } } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- chained dot index with string
+
+s = [=[
+x = a."b"."c"
+]=]
+e = [=[
+{ `Set{ { `Id "x" }, { `Index{ `Index{ `Id "a", `String "b" }, `String "c" } } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- dot index with string followed by call
+
+s = [=[
+x = a."b"(1)
+]=]
+e = [=[
+{ `Set{ { `Id "x" }, { `Call{ `Index{ `Id "a", `String "b" }, `Number "1" } } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
 -- floating points
 
 s = [=[
@@ -1561,6 +1621,39 @@ s = [=[
 ]=]
 e = [=[
 test.lua:1:1: syntax error, unexpected token, invalid start of statement
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- extended dot indexing
+
+s = [=[
+x = a."abc def
+]=]
+e = [=[
+test.lua:1:15: syntax error, unclosed string
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+
+s = [=[
+x = a.'abc def
+]=]
+e = [=[
+test.lua:1:15: syntax error, unclosed string
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+s = [=[
+x = a.1e3
+]=]
+e = [=[
+test.lua:1:8: syntax error, unexpected token, invalid start of statement\n
 ]=]
 
 r = parse(s)

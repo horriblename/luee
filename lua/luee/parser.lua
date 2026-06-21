@@ -358,7 +358,7 @@ local G = {
 
   Expr         = V "AssExpr",
   AssExpr      = V "PipeExpr" * -V "AssOp"
-      + V "VarExpr" * (expectClosing(V "AssOp", V "AssExpr", "AssExpr")) ^ -1 / binaryOp,
+      + V "VarExpr" * expectClosing(V "AssOp", V "AssExpr", "AssExpr") ^ -1 / binaryOp,
   PipeExpr     = chainOp(V "FnExpr", V "PipeOp", "PipeExpr"),
   FnExpr       = Cp() * kw("fn") * V "FuncParams" * expectClosing(Cp(), V "OrExpr", "FnBody") / makeFn
       + V "OrExpr",
@@ -393,7 +393,9 @@ local G = {
 
   SuffixedExpr = Cf(V "PrimaryExpr" * (V "Index" + V "Call") ^ 0, makeIndexOrCall) + tagC("Commat", V "CommatToken"),
   PrimaryExpr  = V "Id" + tagC("Paren", sym("(") * expectClosing(expect(V "Expr", "ExprParen"), sym(")"), "CParenExpr")),
-  Index        = tagC("DotIndex", expectClosing(sym("." * -P "."), V "StrId", "NameIndex"))
+  Index        = tagC("DotIndex",
+        expectClosing(sym("." * -P "."), V "StrId" + tagC("String", V "String") + tagC("Number", token(C(V "Int"))),
+          "NameIndex"))
       + tagC("ArrayIndex",
         sym("[" * -P(S "=["))
         * expectClosing(expect(V "Expr", "ExprIndex"), sym("]"), "CBracketIndex")),

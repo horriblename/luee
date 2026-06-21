@@ -11,6 +11,8 @@ local filename = "test.lua"
 
 local pass_count = 0
 local fail_count = 0
+local elapsed_ok = {}
+local elapsed_err = {}
 
 local function assert_eq(a, b)
   if a ~= b then
@@ -29,14 +31,39 @@ local function assert_eq(a, b)
 end
 
 local function parse(src)
+  local start = os.clock()
   local ast, err = parser.parse(src, filename)
+  local elapsed = os.clock() - start
   local result
   if not ast then
+    elapsed_err[#elapsed_err + 1] = elapsed
     result = err
   else
+    elapsed_ok[#elapsed_ok + 1] = elapsed
     result = pp.tostring(ast)
   end
   return result .. "\n"
+end
+
+local function sum(l)
+  return vim.iter(l):fold(0, function(acc, x)
+    return acc + x
+  end)
+end
+
+local function summary()
+  if fail_count > 0 then
+    print('passed:', pass_count, 'failed:', fail_count)
+  else
+    print("OK passed:", pass_count)
+  end
+
+  local sum_ok = sum(elapsed_ok)
+  local sum_err = sum(elapsed_err)
+  local avg_all = (sum_ok + sum_err) / (#elapsed_ok + #elapsed_err)
+  print('average time for ok cases (ms):  ', (sum_ok / #elapsed_ok) * 1000)
+  print('average time for err cases (ms): ', (sum_ok / #elapsed_ok) * 1000)
+  print('total average time (ms):         ', avg_all * 1000)
 end
 
 local function fixint(str)
@@ -3923,8 +3950,4 @@ e = [=[
 r = parse(s)
 assert_eq(r, e)
 
-if fail_count > 0 then
-  print('passed:', pass_count, 'failed:', fail_count)
-else
-  print("OK passed:", pass_count)
-end
+summary()

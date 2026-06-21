@@ -34,6 +34,8 @@ binding power than any other lua operator
 
 ## Pipe operator
 
+Left-associative.
+
 ```lua
 '(%s)' |> string.format('hi') |> fn(x) x .. '.' |> vim.inspect
 
@@ -42,7 +44,8 @@ binding power than any other lua operator
 vim.inspect((function(x) return x .. '.' end)(string.format('(%s)', 'hi')))
 ```
 
-Pipe operators have the weakest binding power
+Pipe operators have weaker binding power than the assignment operator, but
+stronger than `fn`
 
 # Example
 
@@ -67,8 +70,11 @@ registers, the character after `@` is taken as the
 
 ## Assignment as expression
 
-Single variable assignment `a = b` is now possible. Multi-variable ones
-`a, b = c, d` are not allowed
+Single variable assignment `a = b` is now possible as an expression. It returns
+the value assigned. Multi-variable ones `a, b = c, d` are not allowed.
+
+Right-associative (though it's not something you need to worry about). Stronger
+binding power than any other Luee/Lua operator.
 
 ```vim
 :Luee a = b
@@ -76,7 +82,9 @@ Single variable assignment `a = b` is now possible. Multi-variable ones
 :lua= (function() a = b; return a end)()
 
 :Luee a = (b = c + d),
-" transpiles to
+" is effectively equivalent to
+:lua b = c + d; a = b; return a
+" but the actual transpiled code is
 :lua= (function()
     \    a = (
     \      function()
@@ -92,14 +100,13 @@ Single variable assignment `a = b` is now possible. Multi-variable ones
 > With this extension, some syntax errors in base Lua is now accepted:
 >
 > ```lua
-> -- lua, syntax error
-> x = -
+> -- in lua, this is a syntax error
+> x =
 > y = 3
 > ```
 >
-> is parsed in Luee as
+> The above is parsed by Luee as
 >
 > ```lua
-> -- Luee
-> x = -(y = 3)
+> x = (y = 3)
 > ```

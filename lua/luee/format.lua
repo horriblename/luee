@@ -133,6 +133,8 @@ function var2str(var)
     str = str .. "["
     str = str .. exp2str(var[2])
     str = str .. "]"
+  elseif tag == "Commat" then -- `Commat{<char>}
+    str = "reg[" .. string2str(var[1]) .. "]"
   else
     error("expecting a variable, but got a " .. tag)
   end
@@ -331,9 +333,11 @@ function exp2str(exp)
       end
     end
     str = str .. ")"
-  elseif tag == "Id" or   -- `Id{ <string> }
-      tag == "Index" then -- `Index{ expr expr }
+  elseif tag == "Id" or       -- `Id{ <string> }
+      tag == "Index" then     -- `Index{ expr expr }
     str = var2str(exp)
+  elseif tag == "Commat" then -- `Commat{<char>}
+    str = "reg[" .. string2str(exp[1]) .. "]"
   else
     error("expecting an expression, but got a " .. tag)
   end

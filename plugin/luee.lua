@@ -2,6 +2,12 @@ if vim.g.loaded_luee ~= nil then
   return
 end
 
+_G.reg = setmetatable({}, {
+  __call = function(_, key) return vim.fn.getreg(key) end,
+  __index = function(_, key) return vim.fn.getreg(key) end,
+  __newindex = function(_, key, val) vim.fn.setreg(key, val) end,
+})
+
 local function get_keys(tbl, prefix)
   if type(tbl) ~= "table" then return {} end
   local items = {}

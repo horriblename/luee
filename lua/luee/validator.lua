@@ -290,6 +290,8 @@ function traverse_var(env, var)
     status, msg = traverse_exp(env, var[2])
     if not status then return status, msg end
     return true
+  elseif tag == "Commat" then
+    return true
   else
     error("expecting a variable, but got a " .. tag)
   end
@@ -329,6 +331,8 @@ function traverse_exp(env, exp)
     return traverse_var(env, exp)
   elseif tag == "Fn" then
     return traverse_fn(env, exp)
+  elseif tag == "Commat" then
+    return true
   else
     error("expecting an expression, but got a " .. tag)
   end

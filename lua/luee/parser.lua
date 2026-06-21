@@ -39,7 +39,7 @@ apply:
     `Call{ expr expr* }
   | `Invoke{ expr `String{ <string> } expr* }
 
-lhs: `Id{ <string> } | `Index{ expr expr }
+lhs: `Id{ <string> } | `Index{ expr expr } | `Commat{ <char> }
 
 opid:  -- includes additional operators from Lua 5.3 and all relational operators
     'add'  | 'sub' | 'mul'  | 'div'
@@ -151,6 +151,7 @@ local labels = {
   ["ErrDigitDeci"] = "expected one or more digits after the decimal point",
   ["ErrDigitExpo"] = "expected one or more digits for the exponent",
 
+  ["ErrMissingCommatTarget"] = "expected a non-whitespace character after '@'",
   ["ErrQuote"] = "unclosed string",
   ["ErrHexEsc"] = "expected exactly two hexadecimal digits after '\\x'",
   ["ErrOBraceUEsc"] = "expected '{' after '\\u'",
@@ -383,9 +384,11 @@ local G = {
       + V "SuffixedExpr",
 
   FuncCall     = Cmt(V "SuffixedExpr", function(s, i, exp) return exp.tag == "Call" or exp.tag == "Invoke", exp end),
-  VarExpr      = Cmt(V "SuffixedExpr", function(s, i, exp) return exp.tag == "Id" or exp.tag == "Index", exp end),
+  VarExpr      = Cmt(V "SuffixedExpr", function(s, i, exp)
+    return exp.tag == "Id" or exp.tag == "Index" or exp.tag == "Commat", exp
+  end),
 
-  SuffixedExpr = Cf(V "PrimaryExpr" * (V "Index" + V "Call") ^ 0, makeIndexOrCall),
+  SuffixedExpr = Cf(V "PrimaryExpr" * (V "Index" + V "Call") ^ 0, makeIndexOrCall) + tagC("Commat", V "CommatToken"),
   PrimaryExpr  = V "Id" + tagC("Paren", sym("(") * expectClosing(expect(V "Expr", "ExprParen"), sym(")"), "CParenExpr")),
   Index        = tagC("DotIndex", expectClosing(sym("." * -P "."), V "StrId", "NameIndex"))
       + tagC("ArrayIndex",
@@ -426,6 +429,9 @@ local G = {
   Ident        = V "IdStart" * V "IdRest" ^ 0,
   IdStart      = alpha + P "_",
   IdRest       = alnum + P "_",
+
+  -- commat = commercial at, name taken from the HTML entity &commat, to avoid confusing names
+  CommatToken  = token(expectClosing("@", C(P(1) - P("\t") - P(" ") - P("\n")), "MissingCommatTarget")),
 
   Number       = token((V "Hex" + V "Float" + V "Int") / tonumber),
   Hex          = (P "0x" + "0X") * expect(xdigit ^ 1, "DigitHex"),

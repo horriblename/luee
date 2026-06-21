@@ -141,6 +141,19 @@ e = [=[
 r = parse(s)
 assert_eq(r, e)
 
+--- "@a"
+
+s = [[
+x = @a
+@+ = @"
+]]
+e = [=[
+{ `Set{ { `Id "x" }, { `Commat "a" } }, `Set{ { `Commat "+" }, { `Commat "\"" } } }
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
 -- floating points
 
 s = [=[
@@ -1477,6 +1490,38 @@ a = fn()
 ]=]
 e = [=[
 test.lua:2:1: syntax error, expected an expression after fn(...)
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+-- "@a"
+
+s = [=[
+@a = @
+]=]
+e = [=[
+test.lua:1:7: syntax error, expected a non-whitespace character after '@'
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+s = [=[
+@ = x
+]=]
+e = [=[
+test.lua:1:2: syntax error, expected a non-whitespace character after '@'
+]=]
+
+r = parse(s)
+assert_eq(r, e)
+
+s = [=[
+@= x
+]=]
+e = [=[
+test.lua:1:1: syntax error, unexpected token, invalid start of statement
 ]=]
 
 r = parse(s)
